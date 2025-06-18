@@ -1,0 +1,13 @@
+/* Optional: Lens Zoom Effect */
+@keyframes lens-effect {
+  0% {
+      transform: scale(0.5);
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
+body {
+  animation: lens-effect 2s ease-in-out forwards;
+}
