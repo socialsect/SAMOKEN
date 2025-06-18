@@ -67,13 +67,15 @@ const App = () => {
 
     return (
         <div className="flex justify-center items-center h-[90vh] flex-col relative">
-            <div className="relative">
-                <img
-                    src="/Logos/THE RUNNER-LOGOS-01 (2).svg"
-                    alt="Runner Logo"
-                    height={100}
-                    className="z-10 drop-shadow-lg"
-                />
+            <div className="relative w-full px-4">
+                <div className="max-w-xs mx-auto">
+                    <img
+                        src="/Logos/THE RUNNER-LOGOS-01 (2).svg"
+                        alt="Runner Logo"
+                        className="w-full h-auto drop-shadow-lg"
+                        style={{ maxHeight: '100px' }}
+                    />
+                </div>
             </div>
             <div 
                 ref={comingSoonRef}
