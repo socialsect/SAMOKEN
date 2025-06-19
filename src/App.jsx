@@ -3,7 +3,6 @@ import { gsap } from "gsap";
 import Lenis from "lenis";
 import "./App.css";
 
-// GSAP register plugin
 gsap.config({
     autoSleep: 60,
     force3D: true,
@@ -98,7 +97,9 @@ const App = () => {
                 >
                     Soon
                 </p>
-            </div>
+           
+                  </div>
+               
         </div>
     );
 };
