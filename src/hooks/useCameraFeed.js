@@ -22,8 +22,14 @@ export default function useCameraFeed(enabled = true) {
       // If no deviceId is provided, use the default device
       const constraints = {
         video: deviceId 
-          ? { deviceId: { exact: deviceId } }
-          : true,
+          ? { 
+              deviceId: { exact: deviceId },
+              // Request specific facing mode to help with detection
+              facingMode: { ideal: ['user', 'environment'] }
+            }
+          : {
+              facingMode: { ideal: ['user', 'environment'] }
+            },
         audio: false
       };
       
@@ -32,11 +38,19 @@ export default function useCameraFeed(enabled = true) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         
-        // If we don't have a current device ID, set it now
-        if (!currentDeviceId && stream.getVideoTracks().length > 0) {
+        // Get the current track settings to determine camera type
+        if (stream.getVideoTracks().length > 0) {
           const track = stream.getVideoTracks()[0];
           const settings = track.getSettings();
-          if (settings.deviceId) {
+          
+          // Set a data attribute on the video element to indicate camera type
+          const isFrontCamera = settings.facingMode === 'user' || 
+                              (settings.facingMode === undefined && settings.facingMode !== 'environment');
+          
+          videoRef.current.setAttribute('data-camera-type', isFrontCamera ? 'front' : 'back');
+          
+          // Update current device ID if needed
+          if (settings.deviceId && (!currentDeviceId || deviceId === settings.deviceId)) {
             setCurrentDeviceId(settings.deviceId);
           }
         }
