@@ -1,0 +1,42 @@
+.camera-container {
+    min-height: 100vh;
+    /* background-image: url("/bgblackr.png"); */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    /* padding: 2rem; */
+  }
+  
+  .camera-logo {
+    max-height: 100px;
+    width: auto;
+  }
+  
+  .camera-button {
+    padding: 12px 24px;
+    font-weight: bold;
+    font-family: 'Avenir', sans-serif;
+    background-color: #ba1e1e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .camera-button:hover {
+    background-color: #991818;
+  }
+  
+  .camera-video {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
