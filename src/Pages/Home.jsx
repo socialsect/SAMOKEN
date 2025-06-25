@@ -11,6 +11,7 @@ const Home = () => {
                         alt="Runner Logo"
                         className="w-full h-auto drop-shadow-lg"
                         style={{ maxHeight: '100px' }}
+                        loading="lazy"
                     />
                 </div>
             </div>
@@ -22,6 +23,8 @@ const Home = () => {
                 <p>Soon</p>
             </div>
             <Link to="/camera"><button>The Camera Page</button></Link>
+            <Link to="/login"><button>Log In</button></Link>
+            <Link to="/signup"><button>Sign Up</button></Link>
         </div>
     );
 };
