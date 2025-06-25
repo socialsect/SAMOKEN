@@ -59,6 +59,11 @@ h1, h2, .heading {
   letter-spacing: 0.02em;
   font-weight: 600;
 }
+::selection {
+  background: #323232; /* Background color of the selected text */
+  color: #000000;      /* Color of the selected text */
+}
+
 
 .button {
   font-family: var(--font-body);

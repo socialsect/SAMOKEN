@@ -1,0 +1,476 @@
+/* Import the same CSS variables as AuthPage */
+:root {
+  /* --font-heading: 'GoodTime';
+  --font-body: 'avenir', Arial, sans-serif; */
+}
+
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 10;
+}
+
+.back-icon {
+  color: #ff0000;
+  font-size: 1.8rem;
+  transition: transform 0.2s ease;
+}
+
+.back-button:hover .back-icon {
+  transform: translateX(-3px);
+}
+
+/* Main container */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: 
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0) 60%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0) 60%
+    ),
+    linear-gradient(180deg, #000 0%, #323232 50%, #000 100%);
+  background-attachment: fixed;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 1rem 0;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Add subtle noise texture for luxury feel */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-logo {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto 2rem;
+  display: block;
+}
+
+/* Welcome Text */
+.auth-welcome-text {
+  margin: 0 0 2.5rem;
+  position: relative;
+  z-index: 1;
+  max-width: 400px;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.auth-welcome-text h2 {
+  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #CB0000;
+  text-transform: uppercase;
+}
+label{font-family: var(--font-body);}
+.auth-welcome-text p {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 auto;
+  max-width: 400px;
+  font-weight: 300;
+  font-family: var(--font-body);
+}
+
+/* Form Styles */
+.auth-form {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #000;
+  font-family: var(--font-body);
+  transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #CB0000;
+  box-shadow: 0 0 0 2px rgba(203, 0, 0, 0.2);
+}
+
+.password-field {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.eye-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.forgot-password {
+  font-family: var(--font-body);
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #CB0000;
+  text-decoration: none;
+  margin-top: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #ff3333;
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.auth-btn {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1rem;
+}
+
+.login-submit-btn {
+  background: #CB0000;
+  color: white;
+  border: 1px solid #a30000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-submit-btn:hover {
+  background: #a30000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer */
+.auth-footer {
+  width: 100%;
+  padding: 1.5rem 1rem;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.lang-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-help-privacy {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.auth-help-privacy a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.auth-help-privacy a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (min-width: 576px) {
+  .auth-container {
+    padding: 2rem 1.5rem 0;
+  }
+  
+  .auth-logo {
+    max-width: 320px;
+    margin-bottom: 2.5rem;
+  }
+  
+  .auth-form {
+    max-width: 360px;
+  }
+  
+  .auth-footer {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-container {
+    padding: 2.5rem 2rem 0;
+  }
+  
+  .auth-logo {
+    max-width: 360px;
+    margin-bottom: 3rem;
+  }
+  
+  .auth-form {
+    max-width: 400px;
+  }
+  
+  .auth-welcome-text h2 {
+    font-size: 2rem;
+  }
+  
+  .auth-welcome-text p {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .auth-container {
+    padding: 3rem 2rem 0;
+  }
+  
+  .auth-logo {
+    max-width: 400px;
+  }
+  
+  .auth-form {
+    max-width: 420px;
+  }
+}
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex-grow: 1;
+  }
+  
+  .login-logo {
+    width: 100%;
+    max-width: 280px;
+    margin: 2rem auto 1.5rem;
+  }
+  
+  .login-welcome-text {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .login-welcome-text h2 {
+    color: #cc0000;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  
+  .login-welcome-text p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .form-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .login-input {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: none;
+    background-color: #f2f2f2;
+    font-family: inherit;
+  }
+  
+  .password-field {
+    position: relative;
+  }
+  
+  .eye-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: #666;
+  }
+  
+  .eye-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+  }
+  
+  .eye-toggle:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+  
+  .eye-toggle:focus {
+    outline: 2px solid rgba(203, 0, 0, 0.3);
+    outline-offset: 2px;
+  }
+  
+  .forgot-link {
+    font-size: 0.8rem;
+    color: #cc0000;
+    text-align: right;
+    text-decoration: none;
+  }
+  
+  .login-btn {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #cc0000;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+    text-transform: uppercase;
+  }
+  
+  .login-btn:hover {
+    background-color: #cc0000;
+    color: #fff;
+  }
+  
+  .back-button {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+  }
+  
+  .login-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .lang-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .login-footer-links {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .login-footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+  }
+  
+  .login-footer-links a:hover {
+    color: #fff;
+  }
+  

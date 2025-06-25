@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { toast } from 'react-hot-toast';
 
 export default function useCameraFeed(enabled = true) {
   const videoRef = useRef(null);
@@ -13,11 +14,13 @@ export default function useCameraFeed(enabled = true) {
       streamRef.current = null;
     }
   }, []);
-
+  
   const startStream = useCallback(async (deviceId) => {
     try {
       setIsLoading(true);
       stopStream();
+      
+      const loadingToast = toast.loading('Accessing camera...');
       
       // If no deviceId is provided, use the default device
       const constraints = {
@@ -34,29 +37,37 @@ export default function useCameraFeed(enabled = true) {
       };
       
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
+      if (!videoRef.current) return;
+      
+      videoRef.current.srcObject = stream;
+      streamRef.current = stream;
+      
+      // Get the current track settings to determine camera type
+      if (stream.getVideoTracks().length === 0) return;
+      
+      const track = stream.getVideoTracks()[0];
+      const settings = track.getSettings();
+      
+      // Set a data attribute on the video element to indicate camera type
+      const isFrontCamera = settings.facingMode === 'user' || 
+                          (settings.facingMode === undefined && settings.facingMode !== 'environment');
+      
+      videoRef.current.setAttribute('data-camera-type', isFrontCamera ? 'front' : 'back');
+      
+      // Update current device ID if needed
+      if (settings.deviceId && (!currentDeviceId || deviceId === settings.deviceId)) {
+        setCurrentDeviceId(settings.deviceId);
         
-        // Get the current track settings to determine camera type
-        if (stream.getVideoTracks().length > 0) {
-          const track = stream.getVideoTracks()[0];
-          const settings = track.getSettings();
-          
-          // Set a data attribute on the video element to indicate camera type
-          const isFrontCamera = settings.facingMode === 'user' || 
-                              (settings.facingMode === undefined && settings.facingMode !== 'environment');
-          
-          videoRef.current.setAttribute('data-camera-type', isFrontCamera ? 'front' : 'back');
-          
-          // Update current device ID if needed
-          if (settings.deviceId && (!currentDeviceId || deviceId === settings.deviceId)) {
-            setCurrentDeviceId(settings.deviceId);
-          }
-        }
+        // Show success toast with camera name if available
+        const device = devices.find(d => d.deviceId === settings.deviceId);
+        const cameraName = device?.label || (isFrontCamera ? 'Front Camera' : 'Back Camera');
+        toast.success(`${cameraName} is active`, { id: loadingToast });
+      } else {
+        toast.dismiss(loadingToast);
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
+      toast.error('Failed to access camera. Please check permissions.');
       throw err;
     } finally {
       setIsLoading(false);
@@ -65,27 +76,40 @@ export default function useCameraFeed(enabled = true) {
 
   // Get available devices
   useEffect(() => {
+    let isMounted = true;
+    
     const getDevices = async () => {
       try {
+        // Skip if component is unmounted
+        if (!isMounted) return;
+        
         // First request camera access to ensure we get device labels
         await navigator.mediaDevices.getUserMedia({ video: true });
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         
-        setDevices(videoDevices);
-        
-        // If we have devices but no current device is selected, select the first one
-        if (videoDevices.length > 0 && !currentDeviceId) {
-          setCurrentDeviceId(videoDevices[0].deviceId);
+        // Only update state if devices have actually changed
+        if (JSON.stringify(videoDevices) !== JSON.stringify(devices)) {
+          setDevices(videoDevices);
+          
+          // If we have devices but no current device is selected, select the first one
+          if (videoDevices.length > 0 && !currentDeviceId) {
+            setCurrentDeviceId(videoDevices[0].deviceId);
+          }
         }
       } catch (err) {
         console.error("Error enumerating devices:", err);
       }
     };
 
-    // Listen for device changes (cameras being connected/disconnected)
-    navigator.mediaDevices.addEventListener('devicechange', getDevices);
+    // Initial device load
     getDevices();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      navigator.mediaDevices.removeEventListener('devicechange', getDevices);
+    };
     
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', getDevices);

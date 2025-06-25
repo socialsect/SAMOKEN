@@ -1,7 +1,7 @@
 import React, { useRef, useCallback } from "react";
 import useCameraFeed from "../hooks/useCameraFeed";
 import { FiCamera, FiCameraOff, FiChevronDown, FiCheck, FiRefreshCw } from "react-icons/fi";
-import "./CameraPage.css";
+import "../Styles/CameraPage.css";
 import { useClickAway } from "react-use";
 
 const CameraPage = () => {
