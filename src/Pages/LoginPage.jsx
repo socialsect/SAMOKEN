@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoIosArrowBack } from 'react-icons/io';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
-// import langIcon from '../Assets/globe.png';
 import { IoLanguage } from "react-icons/io5";
 import '../Styles/LoginPage.css';
 
@@ -24,7 +23,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
-    console.log("Login submitted", { email, password, rememberMe });
+   navigate('/initial');
   };
 
   return (
@@ -95,22 +94,16 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            margin: '1rem 0 1.5rem',
-            justifyContent: 'space-between',
-            width: '100%'
-          }}>
-            <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="form-group" style={{ margin: '1.5rem 0' }}>
+            <label className="checkbox-container">
               <input
                 type="checkbox"
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ marginRight: '0.5rem' }}
               />
-              <span style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.8)' }}>Remember me</span>
+              <span className="checkmark"></span>
+              <span className="terms-text" style={{ fontSize: '0.9rem' }}>Remember me</span>
             </label>
           </div>
 

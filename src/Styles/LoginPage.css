@@ -136,7 +136,7 @@ label{font-family: var(--font-body);}
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0.5rem;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   letter-spacing: 0.5px;
 }
 
@@ -472,5 +472,94 @@ label{font-family: var(--font-body);}
   
   .login-footer-links a:hover {
     color: #fff;
+  }
+
+  /* Checkbox Styles */
+  .checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    position: relative;
+    padding-left: 36px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin: 0;
+    transition: color 0.2s ease;
+    user-select: none;
+  }
+
+  .checkbox-container:hover {
+    color: #fff;
+  }
+
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkbox-container .checkmark {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    height: 20px;
+    width: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkbox-container:hover .checkmark {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .checkbox-container input:checked ~ .checkmark {
+    background-color: #CB0000;
+    border-color: #CB0000;
+    animation: checkmarkPop 0.3s ease;
+  }
+
+  @keyframes checkmarkPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -1px;
+  }
+
+  .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+    animation: checkmarkFadeIn 0.2s ease;
+  }
+
+  @keyframes checkmarkFadeIn {
+    from { opacity: 0; transform: rotate(45deg) scale(0.8); }
+    to { opacity: 1; transform: rotate(45deg) scale(1); }
+  }
+
+  .terms-text {
+    display: inline;
+    vertical-align: middle;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
   }
   
