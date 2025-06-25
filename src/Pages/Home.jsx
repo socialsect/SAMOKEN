@@ -23,8 +23,8 @@ const Home = () => {
                 <p>Soon</p>
             </div>
             <Link to="/camera"><button>The Camera Page</button></Link>
-            <Link to="/login"><button>Log In</button></Link>
-            <Link to="/signup"><button>Sign Up</button></Link>
+            {/* <Link to="/login"><button>Log In</button></Link>
+            <Link to="/signup"><button>Sign Up</button></Link> */}
         </div>
     );
 };
