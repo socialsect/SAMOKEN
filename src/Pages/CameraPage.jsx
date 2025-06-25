@@ -46,6 +46,8 @@ const CameraPage = () => {
         src="Logos/THE RUNNER-LOGOS-01 (2).svg"
         alt="RUNNER Logo"
         className="camera-logo"
+    
+        loading="lazy"
       />
       
       <div className="camera-preview">
