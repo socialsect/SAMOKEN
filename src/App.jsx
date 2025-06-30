@@ -1,19 +1,20 @@
 import React from 'react';
-import { gsap } from 'gsap';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 import Routing from './routes/routes';
 import { AuthProvider } from './contexts/AuthContext';
-// gsap.config({
-//     autoSleep: 60,
-//     force3D: true,
-//     nullTargetWarn: false,
-// });
+import TopNavbar from './Components/TopNavbar';
+import BottomNavbar from './Components/BottomNavbar';
+import { motion } from 'framer-motion';
+
 const App = () => {
     return (
-        <div className="App">
-            <AuthProvider>
-                <Routing />
+        <motion.div className="App">
+            <AuthProvider>  
+                <TopNavbar />
+                <main className="main-content">
+                    <Routing />
+                </main>
                 <Toaster 
                     position="top-center"
                     toastOptions={{
@@ -34,7 +35,8 @@ const App = () => {
                         },
                     }}
                 />
+                <BottomNavbar />
             </AuthProvider>
-        </div>);
+        </motion.div>);
 };
 export default App;

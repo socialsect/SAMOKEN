@@ -4,6 +4,7 @@ import { IoIosArrowBack } from 'react-icons/io';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoLanguage } from "react-icons/io5";
 import '../Styles/LoginPage.css';
+// import BottomNavbar from '../Components/BottomNavbar';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -120,6 +121,7 @@ const LoginPage = () => {
           <Link to="/privacy">Privacy</Link>
         </div>
       </footer>
+      {/* <BottomNavbar /> */}
     </div>
   );
 };

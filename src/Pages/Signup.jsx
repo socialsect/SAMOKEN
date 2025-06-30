@@ -186,6 +186,7 @@ const Signup = () => {
           className="auth-logo"
           width={280}
           height="auto"
+          loading="lazy"
         />
       
         <div className="auth-welcome-text">

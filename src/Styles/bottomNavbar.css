@@ -1,0 +1,201 @@
+/* ===== Bottom Navigation Bar ======================== */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  display: flex;
+  background-color: transparent;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background-color: #191919;
+  z-index: -1;
+  border-radius: 0 0 50px 50px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.9);
+  border-top: 3px solid #CB0000;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* For larger screens */
+@media (min-width: 768px) {
+  .nav {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 500px;
+    bottom: 0;
+  }
+  
+  .nav::before {
+    border-radius: 0 0 50px 50px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+/* Navigation Items */
+.item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 8px 0;
+  margin: 0;
+  height: 100%;
+}
+
+/* Icons */
+.icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  fill: currentColor;
+}
+
+/* Active State */
+.item.active {
+  color: var(--runner-white);
+  background-color: #CB0000;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* First item active state with border radius */
+.item:first-child.active {
+  border-bottom-left-radius: 50px;
+  overflow: hidden;
+  margin-right: 0;
+}
+
+/* Last item active state with border radius */
+.item:last-child.active {
+  border-bottom-right-radius: 50px;
+  overflow: hidden;
+  margin-left: 0;
+}
+
+/* Remove the edge extensions */
+.item:first-child.active::before,
+.item:last-child.active::after {
+  content: none;
+}
+
+.item.active .icon {
+  color: #ffffff;
+  fill: currentColor;
+  transform: translateY(-4px) scale(1.2);
+}
+
+/* Hover Effects */
+.item:not(.active):hover {
+  color: #ffffff;
+  z-index: 1919;
+}
+
+.item:not(.active):hover .icon {
+  transform: translateY(-2px) scale(1.1);
+  color: #ffffff;
+  fill: currentColor;
+}
+
+/* Active Indicator */
+.item::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 24px;
+  height: 3px;
+  background: var(--runner-red);
+  border-radius: 3px;
+  transition: transform 0.3s ease;
+}
+
+.item.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Home Item Special Styling - Add custom styles for home icon when active here if needed */
+
+/* Desktop Layout */
+@media (min-width: 1024px) {
+  .nav {
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px 24px 0 0;
+  }
+  
+  .item {
+    flex: 1;
+    padding: 12px 0;
+    margin: 0;
+    height: 100%;
+  }
+  
+  .item.active {
+    margin: 0;
+    padding: 12px 0;
+  }
+  
+  .icon {
+    margin-bottom: 4px;
+  }
+  
+  .label {
+    font-size: 0.65rem;
+  }
+  
+  .item::after {
+    bottom: 8px;
+    left: 50%;
+    right: auto;
+    width: 24px;
+    height: 3px;
+    transform: translateX(-50%) scaleX(0);
+  }
+  
+  .item.active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+/* Animation for active state */
+@keyframes pulse {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}

@@ -27,7 +27,7 @@ const AuthPage = () => {
 
       <footer className="auth-footer">
         <div className="auth-language-selector">
-          <img src="IMGS/eng.png" alt="GB" className="lang-icon"/>
+          <img src="icons/eng.png" alt="GB" className="lang-icon"/>
         </div>
         <div className="auth-help-privacy">
           <a href="/help" className="auth-help-link">Help</a>
