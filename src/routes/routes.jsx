@@ -8,7 +8,7 @@ import Training from "../Pages/Training";
 import AIFit from "../Pages/AIFit";
 import Settings from "../Pages/Settings";
 import NotFound from "../Pages/NotFound";
-import ScrollToTop from "../components/ScrollToTop";
+import ScrollToTop from "../Components/scroll";
 import "../index.css";
 import { motion } from 'framer-motion';
 
