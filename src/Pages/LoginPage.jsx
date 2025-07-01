@@ -24,7 +24,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
-   navigate('/initial');
+   navigate('/home');
   };
 
   return (
