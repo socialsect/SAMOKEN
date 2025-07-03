@@ -22,7 +22,7 @@ const Routing = () => {
       <Route path="/home" element={<Home />} />
       <Route path="/training" element={<Training />} />
       <Route path="/ai-fit" element={<AIFit />} />
-      <Route path="/settings" element={<Settings />} />
+      <Route path="/set" element={<Settings />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<Signup />} />
       {/* Catch-all route for 404 */}

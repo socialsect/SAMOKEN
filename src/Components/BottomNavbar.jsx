@@ -6,7 +6,7 @@ import '../Styles/bottomNavbar.css';
 const navItems = [
   { to: '/home', icon: '/icons/home.svg', label: 'HOME', exact: true },
   { to: '/ai-fit', icon: '/icons/search.svg', label: 'AI FIT' },
-  { to: '/settings', icon: '/icons/settings.svg', label: 'SETTINGS' },
+  { to: '/set', icon: '/icons/settings.svg', label: 'SET' },
   { to: '/training', icon: '/icons/TRAIN.svg', label: 'TRAIN' },
 ];
 
