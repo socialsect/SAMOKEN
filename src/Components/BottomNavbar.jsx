@@ -4,10 +4,10 @@ import clsx from 'clsx';
 import '../Styles/bottomNavbar.css';
 
 const navItems = [
-  { to: '/home', icon: '/icons/home.svg', label: 'HOME', exact: true },
-  { to: '/ai-fit', icon: '/icons/search.svg', label: 'AI FIT' },
-  { to: '/set', icon: '/icons/settings.svg', label: 'SET' },
-  { to: '/training', icon: '/icons/TRAIN.svg', label: 'TRAIN' },
+  { to: '/home', icon: '/icons/home.svg', label: 'HOME', exact: true,id:'i0' },
+  { to: '/ai-fit', icon: '/AI_FIT_ICON (1).svg', label: 'AI FIT',id:'i1' },
+  { to: '/set', icon: '/SET_ICON (1).svg', label: 'SET',id:'i2' },
+  { to: '/training', icon: '/icons/TRAIN.svg', label: 'TRAIN',id:'i3' },
 ];
 
 export default function BottomNavbar() {
@@ -18,13 +18,14 @@ export default function BottomNavbar() {
 
   return (
     <nav className="nav" role="navigation" aria-label="Main navigation">
-      {navItems.map(({ to, icon, label, exact }, idx) => {
+      {navItems.map(({ to, icon, label, exact,id }, idx) => {
         const active = isActive(to, exact);
         return (
           <NavLink
             key={label}
             to={to}
             className={clsx('item', active && 'active', idx === 0 && 'home')}
+            id={id}
             aria-current={active ? 'page' : undefined}
           >
             <img src={icon} alt="" className="icon" aria-hidden="true" />
@@ -32,6 +33,6 @@ export default function BottomNavbar() {
           </NavLink>
         );
       })}
-    </nav>
-  );
+    </nav>
+  );
 }
