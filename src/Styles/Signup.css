@@ -1,10 +1,9 @@
 /* Main container */
-.auth-container {
+.signup-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: 
-    radial-gradient(
+  background: radial-gradient(
       circle at 50% 0%,
       rgba(0, 0, 0, 0.9) 0%,
       rgba(0, 0, 0, 0) 60%
@@ -25,8 +24,8 @@
 }
 
 /* Add subtle noise texture for luxury feel */
-.auth-container::before {
-  content: '';
+.signup-container::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -109,7 +108,7 @@
   line-height: 1.2;
   text-align: center;
   margin-bottom: 1rem;
-  color: #CB0000;
+  color: #cb0000;
   text-transform: uppercase;
 }
 
@@ -178,7 +177,7 @@
 
 .auth-input:focus {
   outline: none;
-  border-color: #CB0000;
+  border-color: #cb0000;
   box-shadow: 0 0 0 3px rgba(203, 0, 0, 0.15);
   background-color: #fff;
 }
@@ -192,7 +191,7 @@
 .auth-input:focus-visible,
 .eye-toggle:focus-visible,
 .checkbox-container input:focus-visible + .checkmark {
-  outline: 2px solid #CB0000;
+  outline: 2px solid #cb0000;
   outline-offset: 2px;
 }
 
@@ -293,15 +292,21 @@
 }
 
 .checkbox-container input:checked ~ .checkmark {
-  background-color: #CB0000;
-  border-color: #CB0000;
+  background-color: #cb0000;
+  border-color: #cb0000;
   animation: checkmarkPop 0.3s ease;
 }
 
 @keyframes checkmarkPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .checkmark:after {
@@ -322,8 +327,14 @@
 }
 
 @keyframes checkmarkFadeIn {
-  from { opacity: 0; transform: rotate(45deg) scale(0.8); }
-  to { opacity: 1; transform: rotate(45deg) scale(1); }
+  from {
+    opacity: 0;
+    transform: rotate(45deg) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+  }
 }
 
 .terms-text {
@@ -345,7 +356,7 @@
 }
 
 .terms-link:after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -367,20 +378,21 @@
 }
 
 /* Error state for required fields */
-.form-group.required .form-label:after {font-family: var(--font-body, sans-serif);
-  content: '*';
+.form-group.required .form-label:after {
+  font-family: var(--font-body, sans-serif);
+  content: "*";
   color: #ff4d4d;
   margin-left: 4px;
 }
 
 .form-group.error .auth-input {
-    font-family: var(--font-body, sans-serif);
+  font-family: var(--font-body, sans-serif);
   border-color: #ff4d4d;
   background-color: rgba(255, 77, 77, 0.05);
 }
 
 .form-group .error-message {
-    font-family: var(--font-body, sans-serif);
+  font-family: var(--font-body, sans-serif);
   color: #ff4d4d;
   font-size: 0.75rem;
   margin-top: 4px;
@@ -426,13 +438,18 @@
 }
 
 .signup-submit-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: 0.5s;
   z-index: -1;
 }
@@ -457,7 +474,7 @@
 }
 
 .login-link {
-  color: #CB0000;
+  color: #cb0000;
   text-decoration: none;
   font-weight: 500;
   margin-left: 0.25rem;
@@ -512,16 +529,16 @@
   .auth-container {
     padding: 2rem 1.5rem 0;
   }
-  
+
   .auth-logo {
     max-width: 320px;
     margin-bottom: 2.5rem;
   }
-  
+
   .auth-form {
     max-width: 440px;
   }
-  
+
   .auth-footer {
     padding: 2rem 1.5rem;
   }
@@ -531,20 +548,20 @@
   .auth-container {
     padding: 2.5rem 2rem 0;
   }
-  
+
   .auth-logo {
     max-width: 360px;
     margin-bottom: 3rem;
   }
-  
+
   .auth-form {
     max-width: 480px;
   }
-  
+
   .auth-welcome-text h2 {
     font-size: 2rem;
   }
-  
+
   .auth-welcome-text p {
     font-size: 1.25rem;
   }
@@ -554,11 +571,11 @@
   .auth-container {
     padding: 3rem 2rem 0;
   }
-  
+
   .auth-logo {
     max-width: 400px;
   }
-  
+
   .auth-form {
     max-width: 500px;
   }
@@ -591,8 +608,14 @@
 
 /* Animation for form elements */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-form > * {
@@ -601,9 +624,21 @@
 }
 
 /* Add delay to form elements */
-.auth-form > *:nth-child(1) { animation-delay: 0.1s; }
-.auth-form > *:nth-child(2) { animation-delay: 0.2s; }
-.auth-form > *:nth-child(3) { animation-delay: 0.3s; }
-.auth-form > *:nth-child(4) { animation-delay: 0.4s; }
-.auth-form > *:nth-child(5) { animation-delay: 0.5s; }
-.auth-form > *:nth-child(6) { animation-delay: 0.6s; }
+.auth-form > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.auth-form > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.auth-form > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.auth-form > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.auth-form > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.auth-form > *:nth-child(6) {
+  animation-delay: 0.6s;
+}

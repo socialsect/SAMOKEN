@@ -1,9 +1,13 @@
-.page-container {
+/* AI Fit specific page container with navbar padding */
+.page-container.ai-fit-page {
+  padding: 70px 20px 20px; /* Space for top and bottom navbars */
+}
+
+.ai-fit-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: 
-    radial-gradient(
+  background: radial-gradient(
       circle at 50% 0%,
       rgba(0, 0, 0, 0.9) 0%,
       rgba(0, 0, 0, 0) 60%
@@ -23,8 +27,8 @@
   box-sizing: border-box;
 }
 
-.page-container::before {
-  content: '';
+.ai-fit-container::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -35,7 +39,7 @@
   z-index: 0;
 }
 
-.auth-content {
+.ai-fit-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -48,7 +52,7 @@
   z-index: 1;
 }
 
-.auth-welcome-text {
+.ai-fit-welcome-text {
   margin: 0 0 2.5rem;
   position: relative;
   z-index: 1;
@@ -57,18 +61,18 @@
   width: 100%;
 }
 
-.auth-welcome-text h2 {
+.ai-fit-welcome-text h2 {
   font-size: 1.8rem;
   font-style: normal;
   font-weight: 400;
   line-height: 1.2;
   text-align: center;
   margin-bottom: 1rem;
-  color: #CB0000;
+  color: #cb0000;
   text-transform: uppercase;
 }
 
-.auth-welcome-text p {
+.ai-fit-welcome-text p {
   font-size: 1.1rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.8);
@@ -77,14 +81,14 @@
   font-weight: 300;
 }
 
-.auth-form {
+.ai-fit-form {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-.auth-btn {
+.ai-fit-btn {
   width: 100%;
   padding: 14px;
   background: #fff;
@@ -100,35 +104,35 @@
   margin-top: 1rem;
 }
 
-.auth-btn:hover {
-  background: #CB0000;
+.ai-fit-btn:hover {
+  background: #cb0000;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(203, 0, 0, 0.2);
 }
 
-.auth-btn:active {
+.ai-fit-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(203, 0, 0, 0.15);
 }
 
-.auth-btn:disabled {
+.ai-fit-btn:disabled {
   background: #666;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.auth-btn:disabled:hover {
+.ai-fit-btn:disabled:hover {
   transform: none;
   box-shadow: none;
 }
 
-.login-redirect {
+.ai-fit-login-redirect {
   margin-top: 1.5rem;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.95rem;
 }
 
-.login-link {
+.ai-fit-login-link {
   color: #000;
   text-decoration: none;
   font-weight: 500;
@@ -136,7 +140,7 @@
   transition: color 0.2s;
 }
 
-.login-link:hover {
+.ai-fit-login-link:hover {
   color: #fff;
   text-decoration: underline;
 }

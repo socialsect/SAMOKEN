@@ -6,8 +6,8 @@
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  padding: 2rem;
-  font-family: 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 70px 2rem 2rem; /* Space for top and bottom navbars */
+  font-family: "Avenir", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .camera-logo {
@@ -181,8 +181,12 @@
 
 /* Loading spinner animation */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin {
@@ -195,12 +199,12 @@
     max-width: 100%;
     border-radius: 12px;
   }
-  
+
   .camera-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .camera-button {
     min-width: 180px;
   }

@@ -1,4 +1,4 @@
-.nav {
+.bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -6,7 +6,7 @@
   height: 72px;
   display: flex;
   background-color: transparent;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   z-index: 1000;
   width: 100%;
@@ -14,8 +14,62 @@
   padding: 0;
 }
 
-.nav::before {
-  content: '';
+.nav-items-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 1001;
+  padding: 0 0px;
+}
+
+.nav-arrow {
+  position: absolute;
+  background: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1002;
+  padding: 0;
+  margin: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.nav-arrow-left {
+  left: 15px;
+}
+
+.nav-arrow-right {
+  right: 15px;
+}
+
+.nav-arrow:hover {
+  color: #cb0000;
+  /* transform: scale(1.1); */
+}
+
+.nav-arrow:active {
+  /* transform: scale(0.95); */
+}
+
+.nav-arrow svg {
+  width: 24px;
+  height: 24px;
+}
+
+.bottom-nav::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -23,13 +77,13 @@
   height: 100%;
   background-color: #191919;
   z-index: -1;
-  border-top: 3px solid #CB0000;
+  border-top: 3px solid #cb0000;
   border-radius: 0 0 50px 50px;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.9);
 }
 
 /* Nav Item */
-.item {
+.bottom-nav-item {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -47,13 +101,13 @@
 }
 
 /* Special HOME tab */
-.item.home {
+.bottom-nav-item.home {
   border-bottom-left-radius: 50px;
   z-index: 2;
 }
 
 /* Icon styles */
-.icon {
+.bottom-nav-icon {
   width: 28px;
   height: 28px;
   margin-bottom: 4px;
@@ -62,7 +116,7 @@
 }
 
 /* Labels */
-.label {
+.bottom-nav-label {
   color: #ffffff;
 }
 
@@ -80,13 +134,13 @@
 } */
 
 /* Hover effect */
-.item:hover .icon {
+.bottom-nav-item:hover .bottom-nav-icon {
   transform: scale(1.1);
 }
 
 /* Vertical dividers */
-.item:not(:first-child)::before {
-  content: '';
+.bottom-nav-item:not(:first-child)::before {
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -96,7 +150,7 @@
   background-color: #444;
   opacity: 0.5;
 }
-#i2 .icon {
+#i2 .bottom-nav-icon {
   width: 38px !important;
   height: 38px !important;
   margin-bottom: 2px !important;
@@ -110,33 +164,40 @@
   justify-content: center;
 }
 
-#i2 .label {
+#i2 .bottom-nav-label {
   position: relative;
   top: 0;
   margin-top: 2px;
 }
 /* Right-side rounded edge */
-.item:last-child {
+.bottom-nav-item:last-child {
   border-bottom-right-radius: 50px;
 }
 
 /* BLUR EFFECT FOR ACTIVE OPTION */
 /* General shadow for active items */
-.item.active {
-
-  background-color: #CB0000;
-  z-index: 2;
+.bottom-nav-item.active {
+  background-color: #cb0000;
+  z-index: 1001;
 }
 
-/* Middle items — both sides */
-.item.active:not(:first-child):not(:last-child) {
-  box-shadow: -6px 0 8px rgba(0, 0, 0, 0.5), 6px 0 8px rgba(0, 0, 0, 0.5);
+/* Active item styling - clean and simple */
+.bottom-nav-item.active {
+  background-color: #cb0000;
+  z-index: 1001;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
-/* First item — only right shadow */
-.item.active:first-child {
-  box-shadow: 6px 0 8px rgba(0, 0, 0, 0.5);
+/* First item — extends to left edge of navbar */
+.bottom-nav-item.active:first-child {
+  border-bottom-left-radius: 50px;
+  margin-left: -20px;
+  padding-left: 20px;
 }
-.item.active:last-child {
-  box-shadow: -6px 0 8px rgba(0, 0, 0, 0.5);
+
+/* Last item — extends to right edge of navbar */
+.bottom-nav-item.active:last-child {
+  border-bottom-right-radius: 50px;
+  margin-right: -20px;
+  padding-right: 20px;
 }

@@ -17,24 +17,17 @@ html {
   flex-direction: column;
   min-height: 100vh;
   font-family: var(--font-body);
-  background: 
-    radial-gradient(
+  background: radial-gradient(
       circle at 50% 0%,
       rgba(0, 0, 0, 0.9) 0%,
       rgba(0, 0, 0, 0) 60%
     ),
-  
     radial-gradient(
       circle at 50% 100%,
       rgba(0, 0, 0, 0.9) 0%,
       rgba(0, 0, 0, 0) 60%
     ),
-    linear-gradient(
-      180deg,
-      #000000 0%,
-      #323232 50%,
-      #000000 100%
-    );
+    linear-gradient(180deg, #000000 0%, #323232 50%, #000000 100%);
   background-attachment: fixed;
   color: #ffffff;
   text-align: center;
@@ -46,7 +39,7 @@ html {
 
 /* Add subtle noise texture for luxury feel */
 .auth-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -84,12 +77,9 @@ html {
   line-height: 34px;
   text-align: center;
   margin-bottom: 20px;
-  color: #CB0000;
+  color: #cb0000;
 }
 /* Welcome to the RUNNER app */
-
-
-
 
 .auth-welcome-text p {
   font-size: 1.5rem;
@@ -144,13 +134,18 @@ html {
 }
 
 .register-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: 0.5s;
   z-index: -1;
 }
@@ -180,13 +175,18 @@ html {
 }
 
 .login-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 0, 0, 0.1),
+    transparent
+  );
   transition: 0.5s;
   z-index: -1;
 }
@@ -238,21 +238,21 @@ html {
   html {
     font-size: 15px;
   }
-  
+
   .auth-container {
     padding: 1.5rem 1.5rem 0;
   }
-  
+
   .auth-logo {
     max-width: 280px;
     margin-bottom: 2rem;
   }
-  
+
   .auth-buttons {
     max-width: 320px;
     padding: 0;
   }
-  
+
   .auth-footer {
     padding: 1.5rem 1.5rem;
   }
@@ -263,26 +263,26 @@ html {
   html {
     font-size: 16px;
   }
-  
+
   .auth-container {
     padding: 3rem 2rem 120px;
   }
-  
+
   .auth-logo {
     max-width: 360px;
     margin-bottom: 3.5rem;
   }
-  
+
   .auth-welcome-text {
     margin: 2rem 0 3rem;
   }
-  
+
   .auth-buttons {
     max-width: 340px;
     gap: 1.25rem;
     margin-bottom: 3rem;
   }
-  
+
   .auth-footer {
     /* padding: 2.5rem 2rem; */
   }
@@ -293,16 +293,16 @@ html {
   .auth-container {
     padding: 4rem 2rem 140px;
   }
-  
+
   .auth-logo {
     max-width: 400px;
     margin-bottom: 4rem;
   }
-  
+
   .auth-welcome-text {
     margin: 2.5rem 0 4rem;
   }
-  
+
   .auth-buttons {
     max-width: 360px;
     margin-bottom: 4rem;
@@ -314,15 +314,15 @@ html {
   .auth-container {
     padding: 5rem 2rem 160px;
   }
-  
+
   .auth-logo {
     max-width: 420px;
   }
-  
+
   .auth-welcome-text {
     max-width: 500px;
   }
-  
+
   .auth-buttons {
     max-width: 380px;
   }
@@ -333,15 +333,15 @@ html {
   html {
     font-size: 17px;
   }
-  
+
   .auth-container {
     padding: 6rem 2rem 180px;
   }
-  
+
   .auth-logo {
     max-width: 450px;
   }
-  
+
   .auth-buttons {
     max-width: 400px;
   }
@@ -376,7 +376,7 @@ html {
 
 .auth-help-link::after,
 .auth-privacy-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -3px;
   left: 0;
@@ -398,10 +398,10 @@ html {
 }
 .lang-icon {
   /* position: absolute; */
-width: 48px;
-height: 48px;
-/* left: 172px;
+  width: 48px;
+  height: 48px;
+  /* left: 172px;
 top: 730px; */
 
-/* background: url(istockphoto-1447066322-612x612.png); */
+  /* background: url(istockphoto-1447066322-612x612.png); */
 }

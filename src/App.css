@@ -14,21 +14,22 @@
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
-  padding: 70px 0; /* Space for top and bottom navbars */
+  /* padding: 70px 0; Space for top and bottom navbars */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
 }
 
 /* Ensure html and body take full height */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
 /* Global Button Styles */
-button {
+/* button {
   padding: 12px 24px;
   font-weight: bold;
   font-family: 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -48,7 +49,7 @@ button {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 } */
-
+/* 
 button:active {
   background-color: #8c1919;
   transform: translateY(0);
@@ -60,8 +61,8 @@ button:focus-visible {
   outline: 3px solid #ffb3b3;
   outline-offset: 2px;
 }
-
-/* Ripple effect */
+/* 
+/* Ripple effect 
 button::after {
   content: '';
   position: absolute;
@@ -73,8 +74,8 @@ button::after {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
+/*
 button:active::after {
   opacity: 1;
   transition: opacity 0s;
-}
+} */

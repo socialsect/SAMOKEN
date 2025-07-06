@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Font Face Definitions */
+      @font-face {
+        font-family: "Avenir";
+        src: url("/Fonts/Avenir (1).ttc") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Avenir";
+        src: url("/Fonts/Avenir (1).ttc") format("truetype");
+        font-weight: bold;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "GoodTimes";
+        src: url("/Fonts/good%20times%20rg.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Avenir", -apple-system, BlinkMacSystemFont, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #e9e9e9;
+        overflow: hidden;
+      }
+      .page {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 360px;
+        max-width: 100%;
+        height: 600px;
+        max-height: 100%;
+        text-align: center;
+        background-color: #e9e9e9;
+        position: relative;
+      }
+      .visible {
+        display: flex;
+      }
+      .button,
+      .start-button,
+      .next-button,
+      .save-button {
+        width: 100%;
+        height: 80px;
+        margin-top: auto;
+        background-color: #8c0000;
+        color: white;
+        line-height: 80px;
+        text-decoration: none;
+        display: inline-block;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .button.clicked,
+      .save-button.clicked {
+        background-color: white;
+        color: #8c0000;
+      }
+      .restart-button {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        background-image: url("https://static.wixstatic.com/media/7c3902_3a3d336e4b134415bd0d2996d9efdfe1~mv2.png/v1/fill/w_88,h_88,al_c,lg_1,q_85,enc_auto/return.png");
+        background-size: cover;
+      }
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* iOS fixes */
+      #background-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #e9e9e9;
+      }
+      #page3 #container,
+      #page4 #container {
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="background-wrapper">
+      <!-- Page 1 -->
+      <div id="page1" class="page visible">
+        <style>
+          #page1 #logo {
+            width: 200px;
+            height: 200px;
+            background-image: url("https://static.wixstatic.com/media/7c3902_d6d8a7ea9e0b4e0b83a0d31e17cbd9d5~mv2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+            animation: fadeIn 4s forwards;
+            margin-top: 80px;
+          }
+          #page1 #test-title {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 1.5;
+            font-family: "Inter";
+            opacity: 0;
+            animation: fadeIn 4s forwards;
+            animation-delay: 2s;
+          }
+          .start-button {
+            opacity: 0;
+            animation: fadeIn 4s forwards;
+            animation-delay: 2s;
+          }
+        </style>
+        <div id="logo"></div>
+        <div id="test-title">WEIGHTS<br />RECOMMENDATION<br />TEST</div>
+        <div class="start-button" onclick="showPage(2)">Start</div>
+      </div>
+
+      <!-- Page 2 -->
+      <div id="page2" class="page">
+        <style>
+          #page2 h2 {
+            margin: 70px 10px 0;
+            width: calc(100% - 20px);
+          }
+          .button {
+            margin: 15px 0;
+          }
+          #handedness-choice {
+            font-size: 24px;
+            margin: auto 0 50px;
+            color: black;
+          }
+        </style>
+        <h2>Are you right handed or left handed?</h2>
+        <div class="button" onclick="selectHandedness('R', this)">
+          Right handed
+        </div>
+        <div class="button" onclick="selectHandedness('L', this)">
+          Left handed
+        </div>
+        <div id="handedness-choice"></div>
+        <div class="restart-button" onclick="showPage(1)"></div>
+      </div>
+
+      <!-- Page 3 -->
+      <div id="page3" class="page">
+        <style>
+          #page3 h2 {
+            margin: 70px 10px 0;
+            width: calc(100% - 20px);
+          }
+          #page3 #container {
+            position: relative;
+            width: 340px;
+            height: 90px;
+            background-image: url("https://static.wixstatic.com/media/7c3902_320d7f64f1ab4dea83a5911489a71015~mv2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin: 50px 0;
+          }
+          .weight {
+            width: 97px;
+            height: 90px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            position: absolute;
+            bottom: 0;
+          }
+          #page3 #weight1 {
+            background-image: url("https://static.wixstatic.com/media/7c3902_8d798ea21e1047a8ab7d1f3024f9c615~mv2.png");
+            left: 0;
+          }
+          #page3 #weight2 {
+            background-image: url("https://static.wixstatic.com/media/7c3902_439f0075379d491cab1074da2241c8a2~mv2.png");
+            left: 243px;
+          }
+          #binary-code-wrapper {
+            width: 100%;
+            margin: auto 0 10px;
+            text-align: center;
+          }
+          #binary-code {
+            font-size: 24px;
+            color: black;
+          }
+        </style>
+        <h2>What is your weights current positions?</h2>
+        <div id="container">
+          <div id="weight1" class="weight"></div>
+          <div id="weight2" class="weight"></div>
+        </div>
+        <div id="binary-code-wrapper">
+          <div id="binary-code">0111111111110</div>
+        </div>
+        <div class="restart-button" onclick="showPage(1)"></div>
+        <div class="next-button" onclick="showPage(4)">Next</div>
+      </div>
+
+      <!-- Page 4 -->
+      <div id="page4" class="page">
+        <style>
+          #page4 h2 {
+            margin: 30px 10px 0;
+            width: calc(100% - 20px);
+          }
+          #page4 h3 {
+            margin: 5px 10px;
+            width: calc(100% - 20px);
+            font-size: 12px;
+            color: gray;
+          }
+          #page4 #container {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            background-image: url("https://static.wixstatic.com/media/7c3902_35a36aab948d40aa9036f75c5661e6da~mv2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin: 20px 0;
+          }
+          .ball {
+            width: 45px;
+            height: 45px;
+            background-image: url("https://static.wixstatic.com/media/7c3902_e337c271a4714ceca05f2534cf6daf75~mv2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            position: absolute;
+          }
+          #coordinates-wrapper {
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+          }
+          #coordinates {
+            font-size: 14px;
+            color: black;
+          }
+        </style>
+        <h2>With this current setting, where are you averaging your putts?</h2>
+        <h3>Do the test with 5 balls on a 3m/10 feet putt</h3>
+        <div id="container">
+          <div id="ball" class="ball" style="left: 195px; top: 305px"></div>
+        </div>
+        <div id="coordinates-wrapper">
+          <div id="coordinates">Place the ball on the green</div>
+        </div>
+        <div class="restart-button" onclick="showPage(1)"></div>
+        <div class="next-button" onclick="showPage(5)">Next</div>
+      </div>
+
+      <!-- Page 5 -->
+      <div id="page5" class="page">
+        <style>
+          #page5 h2 {
+            margin: 60px 10px 0;
+            width: calc(100% - 20px);
+          }
+          #page5 #container {
+            position: relative;
+            width: 340px;
+            height: 90px;
+            background-image: url("https://static.wixstatic.com/media/7c3902_320d7f64f1ab4dea83a5911489a71015~mv2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin: 50px 0;
+          }
+          .weight {
+            width: 97px;
+            height: 90px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+            bottom: 0;
+          }
+          #page5 #weight1 {
+            background-image: url("https://static.wixstatic.com/media/7c3902_8d798ea21e1047a8ab7d1f3024f9c615~mv2.png");
+            left: 0;
+          }
+          #page5 #weight2 {
+            background-image: url("https://static.wixstatic.com/media/7c3902_439f0075379d491cab1074da2241c8a2~mv2.png");
+            left: 243px;
+          }
+          #binary-code-wrapper {
+            width: 100%;
+            margin: auto 0 10px;
+            text-align: center;
+          }
+          #binary-code {
+            font-size: 24px;
+            color: black;
+          }
+          #current-time {
+            font-size: 12px;
+            color: black;
+            margin-top: 10px;
+          }
+          .save-button {
+            width: 100%;
+            height: 80px;
+            margin: 15px 0;
+            background-color: #8c0000;
+            color: white;
+            line-height: 80px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+          }
+          .save-button small {
+            display: block;
+            font-size: 12px;
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            text-align: center;
+            color: white;
+          }
+        </style>
+        <h2>NEW<br />RECOMMENDATION SETTING</h2>
+        <div id="container">
+          <div id="weight1" class="weight"></div>
+          <div id="weight2" class="weight"></div>
+        </div>
+        <div id="binary-code-wrapper">
+          <div id="binary-code">0111111111110</div>
+          <div id="current-time"></div>
+        </div>
+        <div class="save-button" onclick="saveScreen()">SAVE</div>
+        <div class="restart-button" onclick="showPage(1)"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+      const CRAN_WIDTH = 12,
+        TOTAL_CRANS = 13;
+
+      function showPage(n) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("visible"));
+        if (n === 5) updatePage5BinaryCode();
+        document.getElementById("page" + n).classList.add("visible");
+      }
+
+      function selectHandedness(choice, el) {
+        document.getElementById("handedness-choice").innerText = choice;
+        document
+          .querySelectorAll(".button")
+          .forEach((b) => b.classList.remove("clicked"));
+        el.classList.add("clicked");
+        setTimeout(() => showPage(3), 1000);
+      }
+
+      // Page 3: draggable weights
+      function initWeights() {
+        const c = document.querySelector("#page3 #container");
+        const w1 = document.getElementById("weight1"),
+          w2 = document.getElementById("weight2");
+        w1.style.left = "0px";
+        w2.style.left = "243px";
+        makeDraggable(w1, c, true);
+        makeDraggable(w2, c, false);
+        updateBinaryCode();
+      }
+      function makeDraggable(el, container, isLeft) {
+        let down = false,
+          shiftX,
+          rect;
+        function move(px) {
+          let nl = px - shiftX - rect.left;
+          nl = Math.max(
+            0,
+            Math.min(nl, container.clientWidth - el.clientWidth)
+          );
+          const other = document.getElementById(isLeft ? "weight2" : "weight1");
+          const oL = parseInt(other.style.left, 10);
+          if (isLeft && nl + el.clientWidth > oL) nl = oL - el.clientWidth;
+          if (
+            !isLeft &&
+            nl <
+              parseInt(document.getElementById("weight1").style.left, 10) +
+                el.clientWidth
+          )
+            nl =
+              parseInt(document.getElementById("weight1").style.left, 10) +
+              el.clientWidth;
+          el.style.left = nl + "px";
+        }
+        el.addEventListener("mousedown", (e) => {
+          down = true;
+          shiftX = e.clientX - el.getBoundingClientRect().left;
+          rect = container.getBoundingClientRect();
+          document.addEventListener("mousemove", onMove);
+        });
+        el.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            down = true;
+            shiftX = e.touches[0].clientX - el.getBoundingClientRect().left;
+            rect = container.getBoundingClientRect();
+            document.addEventListener("touchmove", onTouch, { passive: false });
+          },
+          { passive: false }
+        );
+        document.addEventListener("mouseup", () => {
+          if (!down) return;
+          down = false;
+          document.removeEventListener("mousemove", onMove);
+          el.style.left =
+            Math.round(parseInt(el.style.left, 10) / CRAN_WIDTH) * CRAN_WIDTH +
+            "px";
+          updateBinaryCode();
+        });
+        document.addEventListener("touchend", () => {
+          if (!down) return;
+          down = false;
+          document.removeEventListener("touchmove", onTouch);
+          el.style.left =
+            Math.round(parseInt(el.style.left, 10) / CRAN_WIDTH) * CRAN_WIDTH +
+            "px";
+          updateBinaryCode();
+        });
+        function onMove(e) {
+          move(e.pageX);
+        }
+        function onTouch(e) {
+          e.preventDefault();
+          move(e.touches[0].clientX);
+        }
+        el.ondragstart = () => false;
+      }
+      function updateBinaryCode() {
+        const w1 = Math.round(
+          parseInt(document.getElementById("weight1").style.left, 10) /
+            CRAN_WIDTH
+        );
+        const w2 = Math.round(
+          (parseInt(document.getElementById("weight2").style.left, 10) - 243) /
+            CRAN_WIDTH
+        );
+        let b = Array(TOTAL_CRANS).fill("1");
+        b[w1] = b[w2 + TOTAL_CRANS - 1] = "0";
+        document.getElementById("binary-code").innerText = b.join("");
+      }
+
+      // Page 4: draggable ball
+      const ballPositions = [
+        { x: 170, y: 170, name: "0" },
+        { x: 170 + 65, y: 170, name: "A3" },
+        { x: 170 - 65, y: 170, name: "A9" },
+        { x: 170, y: 170 + 65, name: "A6" },
+        { x: 170, y: 170 - 65, name: "A12" },
+        { x: 170 + 100, y: 170, name: "B3" },
+        { x: 170 - 100, y: 170, name: "B9" },
+        { x: 170, y: 170 + 100, name: "B6" },
+        { x: 170, y: 170 - 100, name: "B12" },
+        { x: 170 + 135, y: 170, name: "C3" },
+        { x: 170 - 135, y: 170, name: "C9" },
+        { x: 170, y: 170 + 135, name: "C6" },
+        { x: 170, y: 170 - 135, name: "C12" },
+        { x: 170 + 65 / Math.SQRT2, y: 170 + 65 / Math.SQRT2, name: "A5" },
+        { x: 170 - 65 / Math.SQRT2, y: 170 + 65 / Math.SQRT2, name: "A7" },
+        { x: 170 + 65 / Math.SQRT2, y: 170 - 65 / Math.SQRT2, name: "A2" },
+        { x: 170 - 65 / Math.SQRT2, y: 170 - 65 / Math.SQRT2, name: "A10" },
+        { x: 170 + 100 / Math.SQRT2, y: 170 + 100 / Math.SQRT2, name: "B5" },
+        { x: 170 - 100 / Math.SQRT2, y: 170 + 100 / Math.SQRT2, name: "B7" },
+        { x: 170 + 100 / Math.SQRT2, y: 170 - 100 / Math.SQRT2, name: "B2" },
+        { x: 170 - 100 / Math.SQRT2, y: 170 - 100 / Math.SQRT2, name: "B10" },
+        { x: 170 + 135 / Math.SQRT2, y: 170 + 135 / Math.SQRT2, name: "C5" },
+        { x: 170 - 135 / Math.SQRT2, y: 170 + 135 / Math.SQRT2, name: "C7" },
+        { x: 170 + 135 / Math.SQRT2, y: 170 - 135 / Math.SQRT2, name: "C2" },
+        { x: 170 - 135 / Math.SQRT2, y: 170 - 135 / Math.SQRT2, name: "C10" },
+      ];
+      function getClosestPosition(x, y) {
+        return ballPositions.reduce((a, c) => {
+          const da = (a.x - x) ** 2 + (a.y - y) ** 2;
+          const dc = (c.x - x) ** 2 + (c.y - y) ** 2;
+          return dc < da ? c : a;
+        });
+      }
+      function initBall() {
+        const ball = document.getElementById("ball"),
+          cont = document.querySelector("#page4 #container");
+        ball.style.left = "195px";
+        ball.style.top = "305px";
+        makeDraggableBall(ball, cont);
+      }
+      function makeDraggableBall(el, container) {
+        let down = false,
+          shiftX,
+          shiftY,
+          rect;
+        function move(px, py) {
+          let nl = px - shiftX - rect.left;
+          let nt = py - shiftY - rect.top;
+          nl = Math.max(0, Math.min(nl, rect.width - el.offsetWidth));
+          nt = Math.max(0, Math.min(nt, rect.height - el.offsetHeight));
+          const centerX = nl + el.offsetWidth / 2;
+          const centerY = nt + el.offsetHeight / 2;
+          const pos = getClosestPosition(centerX, centerY);
+          el.style.left = pos.x - el.offsetWidth / 2 + "px";
+          el.style.top = pos.y - el.offsetHeight / 2 + "px";
+        }
+        el.addEventListener("mousedown", (e) => {
+          down = true;
+          shiftX = e.clientX - el.getBoundingClientRect().left;
+          shiftY = e.clientY - el.getBoundingClientRect().top;
+          rect = container.getBoundingClientRect();
+          document.addEventListener("mousemove", onMove);
+        });
+        el.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            down = true;
+            shiftX = e.touches[0].clientX - el.getBoundingClientRect().left;
+            shiftY = e.touches[0].clientY - el.getBoundingClientRect().top;
+            rect = container.getBoundingClientRect();
+            document.addEventListener("touchmove", onTouch, { passive: false });
+          },
+          { passive: false }
+        );
+        document.addEventListener("mouseup", () => {
+          if (!down) return;
+          down = false;
+          document.removeEventListener("mousemove", onMove);
+          updateCoordinates();
+        });
+        document.addEventListener("touchend", () => {
+          if (!down) return;
+          down = false;
+          document.removeEventListener("touchmove", onTouch);
+          updateCoordinates();
+        });
+        function onMove(e) {
+          move(e.pageX, e.pageY);
+        }
+        function onTouch(e) {
+          e.preventDefault();
+          move(e.touches[0].clientX, e.touches[0].clientY);
+        }
+        el.ondragstart = () => false;
+      }
+      function updateCoordinates() {
+        const ball = document.getElementById("ball");
+        const left = parseInt(ball.style.left, 10) + ball.offsetWidth / 2;
+        const top = parseInt(ball.style.top, 10) + ball.offsetHeight / 2;
+        document.getElementById("coordinates").innerText = getClosestPosition(
+          left,
+          top
+        ).name;
+      }
+
+      // Page 5: compute new binary code & update weights
+      function getNewBinaryCode() {
+        const currentBinaryCode = document.querySelector(
+          "#page3 #binary-code"
+        ).innerText;
+        const ballPosition = document.querySelector(
+          "#page4 #coordinates"
+        ).innerText;
+        const results = {
+          "0111111111111": {
+            A6: "0111111111110",
+            B6: "0111111111110",
+            C6: "0111111111110",
+            A3: "0011111111111",
+            B3: "1001111111111",
+            C3: "1100111111111",
+            A9: "0111111111110",
+            B9: "0111111111110",
+            C9: "0111111111110",
+            A12: "0011111111111",
+            B12: "0101111111111",
+            C12: "0110111111111",
+            A7: "0111111111110",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "0011111111111",
+            B5: "0011111111111",
+            C5: "0011111111111",
+            A10: "0111111111110",
+            B10: "0111111111110",
+            C10: "0111111111110",
+            A2: "0011111111111",
+            B2: "1001111111111",
+            C2: "1100111111111",
+          },
+          "0011111111111": {
+            A6: "0111111111110",
+            B6: "0111111111110",
+            C6: "0111111111110",
+            A3: "1001111111111",
+            B3: "1100111111111",
+            C3: "1110011111111",
+            A9: "0111111111110",
+            B9: "0111111111110",
+            C9: "0111111111110",
+            A12: "0101111111111",
+            B12: "0110111111111",
+            C12: "0111011111111",
+            A7: "0111111111110",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "1001111111111",
+            B5: "1001111111111",
+            C5: "1001111111111",
+            A10: "0111111111110",
+            B10: "0111111111110",
+            C10: "0111111111110",
+            A2: "1001111111111",
+            B2: "1100111111111",
+            C2: "1110011111111",
+          },
+          "0101111111111": {
+            A6: "0111111111110",
+            B6: "0111111111110",
+            C6: "0111111111110",
+            A3: "1010111111111",
+            B3: "1101011111111",
+            C3: "1110101111111",
+            A9: "0011111111111",
+            B9: "0111111111110",
+            C9: "0111111111110",
+            A12: "0110111111111",
+            B12: "0111011111111",
+            C12: "0111101111111",
+            A7: "0111111111110",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "1100111111111",
+            B5: "1100111111111",
+            C5: "1100111111111",
+            A10: "0011111111111",
+            B10: "0111111111110",
+            C10: "0111111111110",
+            A2: "1100111111111",
+            B2: "1110011111111",
+            C2: "1111001111111",
+          },
+          "0110111111111": {
+            A6: "0011111111111",
+            B6: "0111111111110",
+            C6: "0111111111110",
+            A3: "1011011111111",
+            B3: "1101101111111",
+            C3: "1110110111111",
+            A9: "0101111111111",
+            B9: "0011111111111",
+            C9: "0111111111110",
+            A12: "0111011111111",
+            B12: "0111101111111",
+            C12: "0111110111111",
+            A7: "0111111111110",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "1101011111111",
+            B5: "1110011111111",
+            C5: "1110011111111",
+            A10: "0101111111111",
+            B10: "0011111111111",
+            C10: "0111111111110",
+            A2: "1101011111111",
+            B2: "1110101111111",
+            C2: "1111010111111",
+          },
+          "0111011111111": {
+            A6: "1001111111111",
+            B6: "0111111111110",
+            C6: "0111111111110",
+            A3: "1011101111111",
+            B3: "1101110111111",
+            C3: "1110111011111",
+            A9: "0110111111111",
+            B9: "0101111111111",
+            C9: "0011111111111",
+            A12: "0111101111111",
+            B12: "0111110111111",
+            C12: "0111111011111",
+            A7: "0011111111111",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "1101101111111",
+            B5: "1111001111111",
+            C5: "1111001111111",
+            A10: "0110111111111",
+            B10: "0101111111111",
+            C10: "0011111111111",
+            A2: "1101101111111",
+            B2: "1110110111111",
+            C2: "1111011011111",
+          },
+          "0111101111111": {
+            A6: "1100111111111",
+            B6: "0011111111111",
+            C6: "0111111111110",
+            A3: "1011110111111",
+            B3: "1101111011111",
+            C3: "1110111101111",
+            A9: "0111011111111",
+            B9: "0110111111111",
+            C9: "0101111111111",
+            A12: "0111110111111",
+            B12: "0111111011111",
+            C12: "0111111101111",
+            A7: "1001111111111",
+            B7: "0111111111110",
+            C7: "0111111111110",
+            A5: "1101110111111",
+            B5: "1111010111111",
+            C5: "1111100111111",
+            A10: "0111011111111",
+            B10: "0110111111111",
+            C10: "0101111111111",
+            A2: "1101110111111",
+            B2: "1110111011111",
+            C2: "1111011101111",
+          },
+          "0111110111111": {
+            A6: "1101011111111",
+            B6: "1001111111111",
+            C6: "0111111111110",
+            A3: "1011111011111",
+            B3: "1101111101111",
+            C3: "1110111110111",
+            A9: "0111101111111",
+            B9: "0111011111111",
+            C9: "0110111111111",
+            A12: "0111111011111",
+            B12: "0111111101111",
+            C12: "0111111110111",
+            A7: "1010111111111",
+            B7: "0011111111111",
+            C7: "0111111111110",
+            A5: "1101111011111",
+            B5: "1111011011111",
+            C5: "1111110011111",
+            A10: "0111101111111",
+            B10: "0111011111111",
+            C10: "0110111111111",
+            A2: "1101111011111",
+            B2: "1110111101111",
+            C2: "1111011110111",
+          },
+          "0111111011111": {
+            A6: "1101101111111",
+            B6: "1100111111111",
+            C6: "0011111111111",
+            A3: "1011111101111",
+            B3: "1101111110111",
+            C3: "1110111111011",
+            A9: "0111110111111",
+            B9: "0111101111111",
+            C9: "0111011111111",
+            A12: "0111111101111",
+            B12: "0111111110111",
+            C12: "0111111111011",
+            A7: "1011011111111",
+            B7: "1001111111111",
+            C7: "0111111111110",
+            A5: "1101111110111",
+            B5: "1111011110111",
+            C5: "1111110110111",
+            A10: "0111110111111",
+            B10: "0111101111111",
+            C10: "0111011111111",
+            A2: "1101111111101",
+            B2: "1110111110111",
+            C2: "1111011111011",
+          },
+          "0111111101111": {
+            A6: "1101110111111",
+            B6: "1110011111111",
+            C6: "1001111111111",
+            A3: "1011111110111",
+            B3: "1101111111011",
+            C3: "1110111111101",
+            A9: "0111111011111",
+            B9: "0111110111111",
+            C9: "0111101111111",
+            A12: "0111111110111",
+            B12: "0111111111011",
+            C12: "0111111111101",
+            A7: "1011101111111",
+            B7: "1100111111111",
+            C7: "0011111111111",
+            A5: "1101111110111",
+            B5: "1111011110111",
+            C5: "1111110110111",
+            A10: "0111111011111",
+            B10: "0111110111111",
+            C10: "0111101111111",
+            A2: "1110111111110",
+            B2: "1111011111110",
+            C2: "1111101111110",
+          },
+          "0111111110111": {
+            A6: "1101111011111",
+            B6: "1111001111111",
+            C6: "1100111111111",
+            A3: "1011111111011",
+            B3: "1101111111101",
+            C3: "1110111111110",
+            A9: "0111111101111",
+            B9: "0111111011111",
+            C9: "0111110111111",
+            A12: "0111111111011",
+            B12: "0111111111101",
+            C12: "0111111111110",
+            A7: "1011110111111",
+            B7: "1101011111111",
+            C7: "1001111111111",
+            A5: "1101111111011",
+            B5: "1111011111011",
+            C5: "1111110110111",
+            A10: "0111111101111",
+            B10: "0111111011111",
+            C10: "0111110111111",
+            A2: "1111111110110",
+            B2: "1111111111100",
+            C2: "1111111111100",
+          },
+          "0111111111011": {
+            A6: "1101111101111",
+            B6: "1111010111111",
+            C6: "1110011111111",
+            A3: "1011111111101",
+            B3: "1101111111110",
+            C3: "1110111111110",
+            A9: "0111111110111",
+            B9: "0111111101111",
+            C9: "0111111011111",
+            A12: "0111111111101",
+            B12: "0111111111110",
+            C12: "0111111111110",
+            A7: "1011111011111",
+            B7: "1101101111111",
+            C7: "1100111111111",
+            A5: "1101111111101",
+            B5: "1111011111011",
+            C5: "1111110110111",
+            A10: "0111111110111",
+            B10: "0111111101111",
+            C10: "0111111011111",
+            A2: "1111111111101",
+            B2: "1111111111010",
+            C2: "1111111111100",
+          },
+          "0111111111101": {
+            A6: "1101111110111",
+            B6: "1111011011111",
+            C6: "1111001111111",
+            A3: "1011111111110",
+            B3: "1101111111110",
+            C3: "1110111111110",
+            A9: "0111111111011",
+            B9: "0111111110111",
+            C9: "0111111101111",
+            A12: "0111111111110",
+            B12: "0111111111110",
+            C12: "0111111111110",
+            A7: "1011111101111",
+            B7: "1101110111111",
+            C7: "1110011111111",
+            A5: "1101111111101",
+            B5: "1111011111011",
+            C5: "1111110110111",
+            A10: "0111111111011",
+            B10: "0111111110111",
+            C10: "0111111101111",
+            A2: "1111111111110",
+            B2: "1111111111110",
+            C2: "1111111111110",
+          },
+          "0111111111110": {
+            A6: "1101111111011",
+            B6: "1111011101111",
+            C6: "1111100111111",
+            A3: "1011111111110",
+            B3: "1101111111110",
+            C3: "1110111111110",
+            A9: "0111111111101",
+            B9: "0111111111011",
+            C9: "0111111110111",
+            A12: "0111111111110",
+            B12: "0111111111110",
+            C12: "0111111111110",
+            A7: "1011111110111",
+            B7: "1101111011111",
+            C7: "1110101111111",
+            A5: "1101111111101",
+            B5: "1111011111011",
+            C5: "1111110110111",
+            A10: "0111111111101",
+            B10: "0111111111011",
+            C10: "0111111110111",
+            A2: "1101111111110",
+            B2: "1110111111110",
+            C2: "1111011111110",
+          },
+          1011111111110: {
+            A6: "1110111111011",
+            B6: "1111101101111",
+            C6: "1111100111111",
+            A3: "1101111111110",
+            B3: "1110111111110",
+            C3: "1111011111110",
+            A9: "0111111111101",
+            B9: "0111111111011",
+            C9: "0111111110111",
+            A12: "0111111111110",
+            B12: "0111111111110",
+            C12: "0111111111110",
+            A7: "1011111110111",
+            B7: "1101111011111",
+            C7: "1110101111111",
+            A5: "1110111111101",
+            B5: "1111101111011",
+            C5: "1111111010111",
+            A10: "0111111111101",
+            B10: "0111111111011",
+            C10: "0111111110111",
+            A2: "1110111111110",
+            B2: "1111011111110",
+            C2: "1111101111110",
+          },
+          1101111111110: {
+            A6: "1111011111011",
+            B6: "1111110101111",
+            C6: "1111100111111",
+            A3: "1110111111110",
+            B3: "1111011111110",
+            C3: "1111101111110",
+            A9: "1011111111101",
+            B9: "0111111111011",
+            C9: "0111111110111",
+            A12: "1011111111110",
+            B12: "0111111111110",
+            C12: "0111111111110",
+            A7: "1101111110111",
+            B7: "1101111011111",
+            C7: "1110101111111",
+            A5: "1111011111101",
+            B5: "1111110111011",
+            C5: "1111111100111",
+            A10: "0111111111101",
+            B10: "0111111111011",
+            C10: "0111111110111",
+            A2: "1111011111110",
+            B2: "1111101111110",
+            C2: "1111110111110",
+          },
+          1110111111110: {
+            A6: "1111101111011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111011111110",
+            B3: "1111101111110",
+            C3: "1111110111110",
+            A9: "1101111111101",
+            B9: "1011111111011",
+            C9: "0111111110111",
+            A12: "1101111111110",
+            B12: "1011111111110",
+            C12: "0111111111110",
+            A7: "1110111110111",
+            B7: "1110111011111",
+            C7: "1110101111111",
+            A5: "1111101111101",
+            B5: "1111111011011",
+            C5: "1111111100111",
+            A10: "1011111111101",
+            B10: "0111111111011",
+            C10: "0111111110111",
+            A2: "1111101111110",
+            B2: "1111110111110",
+            C2: "1111111011110",
+          },
+          1111011111110: {
+            A6: "1111110111011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111101111110",
+            B3: "1111110111110",
+            C3: "1111111011110",
+            A9: "1110111111101",
+            B9: "1101111111011",
+            C9: "1011111110111",
+            A12: "1110111111110",
+            B12: "1101111111110",
+            C12: "1011111111110",
+            A7: "1111011110111",
+            B7: "1111011011111",
+            C7: "1111001111111",
+            A5: "1111110111101",
+            B5: "1111111101011",
+            C5: "1111111100111",
+            A10: "1101111111101",
+            B10: "1011111111011",
+            C10: "0111111110111",
+            A2: "1111110111110",
+            B2: "1111111011110",
+            C2: "1111111101110",
+          },
+          1111101111110: {
+            A6: "1111111011011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111110111110",
+            B3: "1111111011110",
+            C3: "1111111101110",
+            A9: "1111011111101",
+            B9: "1110111111011",
+            C9: "1101111110111",
+            A12: "1111011111110",
+            B12: "1110111111110",
+            C12: "1101111111110",
+            A7: "1111101110111",
+            B7: "1111101011111",
+            C7: "1111001111111",
+            A5: "1111111011101",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1110111111101",
+            B10: "1101111111011",
+            C10: "1011111110111",
+            A2: "1111111011110",
+            B2: "1111111101110",
+            C2: "1111111110110",
+          },
+          1111110111110: {
+            A6: "1111111101011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111011110",
+            B3: "1111111101110",
+            C3: "1111111110110",
+            A9: "1111101111101",
+            B9: "1111011111011",
+            C9: "1110111110111",
+            A12: "1111101111110",
+            B12: "1111011111110",
+            C12: "1110111111110",
+            A7: "1111110110111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111101101",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111011111101",
+            B10: "1110111111011",
+            C10: "1101111110111",
+            A2: "1111111101110",
+            B2: "1111111110110",
+            C2: "1111111111010",
+          },
+          1111111011110: {
+            A6: "1111111110011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111101110",
+            B3: "1111111110110",
+            C3: "1111111111010",
+            A9: "1111110111101",
+            B9: "1111101111011",
+            C9: "1111011110111",
+            A12: "1111110111110",
+            B12: "1111101111110",
+            C12: "1111011111110",
+            A7: "1111111010111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111110101",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111101111101",
+            B10: "1111011111011",
+            C10: "1110111110111",
+            A2: "1111111110110",
+            B2: "1111111111010",
+            C2: "1111111111100",
+          },
+          1111111101110: {
+            A6: "1111111110011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111110110",
+            B3: "1111111111010",
+            C3: "1111111111100",
+            A9: "1111111011101",
+            B9: "1111110111011",
+            C9: "1111101110111",
+            A12: "1111111011110",
+            B12: "1111110111110",
+            C12: "1111101111110",
+            A7: "1111111100111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111111001",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111110111101",
+            B10: "1111101111011",
+            C10: "1111011110111",
+            A2: "1111111111010",
+            B2: "1111111111100",
+            C2: "1111111111100",
+          },
+          1111111110110: {
+            A6: "1111111110011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111111010",
+            B3: "1111111111100",
+            C3: "1111111111100",
+            A9: "1111111101101",
+            B9: "1111111011011",
+            C9: "1111110110111",
+            A12: "1111111101110",
+            B12: "1111111011110",
+            C12: "1111110111110",
+            A7: "1111111100111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111111001",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111111011101",
+            B10: "1111110111011",
+            C10: "1111101110111",
+            A2: "1111111111100",
+            B2: "1111111111100",
+            C2: "1111111111100",
+          },
+          1111111111010: {
+            A6: "1111111110011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111111100",
+            B3: "1111111111100",
+            C3: "1111111111100",
+            A9: "1111111110101",
+            B9: "1111111101011",
+            C9: "1111111010111",
+            A12: "1111111110110",
+            B12: "1111111101110",
+            C12: "1111111011110",
+            A7: "1111111100111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111111001",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111111101101",
+            B10: "1111111011011",
+            C10: "1111110110111",
+            A2: "1111111111100",
+            B2: "1111111111100",
+            C2: "1111111111100",
+          },
+          1111111111100: {
+            A6: "1111111110011",
+            B6: "1111111001111",
+            C6: "1111100111111",
+            A3: "1111111111100",
+            B3: "1111111111100",
+            C3: "1111111111100",
+            A9: "1111111111001",
+            B9: "1111111110011",
+            C9: "1111111100111",
+            A12: "1111111111010",
+            B12: "1111111110110",
+            C12: "1111111101110",
+            A7: "1111111100111",
+            B7: "1111110011111",
+            C7: "1111001111111",
+            A5: "1111111111001",
+            B5: "1111111110011",
+            C5: "1111111100111",
+            A10: "1111111110101",
+            B10: "1111111101011",
+            C10: "1111111010111",
+            A2: "1111111111100",
+            B2: "1111111111100",
+            C2: "1111111111100",
+          },
+        };
+        return results[currentBinaryCode]?.[ballPosition] || currentBinaryCode;
+      }
+
+      function updatePage5Weights(newBinaryCode) {
+        const w1 = document.querySelector("#page5 #weight1");
+        const w2 = document.querySelector("#page5 #weight2");
+        const pos1 = newBinaryCode.indexOf("0");
+        const pos2 = newBinaryCode.lastIndexOf("0") - (TOTAL_CRANS - 1);
+        w1.style.left = pos1 * CRAN_WIDTH + "px";
+        w2.style.left = 243 + pos2 * CRAN_WIDTH + "px";
+      }
+
+      function updatePage5BinaryCode() {
+        const code = getNewBinaryCode();
+        document.querySelector("#page5 #binary-code").innerText = code;
+        updatePage5Weights(code);
+      }
+
+      function saveScreen() {
+        const now = new Date();
+        document.getElementById("current-time").innerText =
+          now.toLocaleString();
+        html2canvas(document.body, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+        })
+          .then((canvas) => {
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = `recommendation-${now
+              .toISOString()
+              .slice(0, 10)}.png`;
+            link.click();
+            alert("La capture d'écran a été prise.");
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Erreur lors de la capture.");
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initWeights();
+        initBall();
+      });
+    </script>
+  </body>
+</html>
