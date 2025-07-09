@@ -92,9 +92,11 @@
   width: 100%;
   padding: 14px;
   background: #fff;
-  color: #fff;
+  color: #000;
   border: none;
   border-radius: 8px;
+  font-family: "GoodTimes";
+  box-shadow: 4px 4px 0 0 #e60000;
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;

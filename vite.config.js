@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
-    allowedHosts: ["social-clowns-bathe.loca.lt"],
+    allowedHosts: ["bumpy-seas-poke.loca.lt"],
   },
   css: {
     postcss: undefined,

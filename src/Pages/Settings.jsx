@@ -25,13 +25,14 @@ const Settings = () => {
 
   return (
     <div className="page-container">
-      <TopNavbar />
+     {showEasySetup ? "": <TopNavbar />
+     }
 
       {showEasySetup ? (
         <div className="setup-content">
-          <button className="back-btn" onClick={handleBack}>
+          {/* <button className="back-btn" onClick={handleBack}>
             ← Back to Settings
-          </button>
+          </button> */}
           <iframe
             src="/index-2 (1).html"
             title="Easy Setup Guide"
@@ -99,7 +100,7 @@ const Settings = () => {
             <div className="auth-buttons">
               <button
                 className="login-btn pad-but-setting"
-                onClick={handleExpertSetup}
+                // onClick={handleExpertSetup}
               >
                 START
               </button>
@@ -108,7 +109,8 @@ const Settings = () => {
         </>
       )}
 
-      <BottomNavbar />
+{showEasySetup ? "": <BottomNavbar />
+     }
     </div>
   );
 };

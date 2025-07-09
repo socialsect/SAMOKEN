@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import "../Styles/Ai-fit.css";
-import { Link } from "react-router-dom";
+import { Link ,useNavigate} from "react-router-dom";
 import PuttingAnalyser from "../Components/PutterTracker";
+
 import TopNavbar from "../Components/TopNavbar";
 import BottomNavbar from "../Components/BottomNavbar";
 const AIFit = () => {
+  const navigate=useNavigate()
   const [visible, setvisible] = useState(false);
   const makevisible = () => {
     setvisible(true);
@@ -21,9 +23,10 @@ const AIFit = () => {
               created over 2,000 putter configurations and a smart AI quiz to
               help you find your perfect match. Let's get started
             </p>
-            <button className="auth-btn" onClick={() => makevisible()}>
+            <button className="ai-fit-btn" onClick={() => makevisible()}>
               START
             </button>
+            <button className="ai-fit-btn" onClick={()=>{navigate("/posture-detection")}}>Posture Detection Algorithm</button>
           </div>
         )}
         <div className="auth-form">{visible && <PuttingAnalyser />}</div>

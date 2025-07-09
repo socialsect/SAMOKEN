@@ -12,12 +12,19 @@ import ScrollToTop from "../Components/scroll";
 import "../index.css";
 import { motion } from "framer-motion";
 import Camera from "../Components/camera";
+import { useEffect, useState } from "react";
+import AuthCallback from "../Pages/AuthCallback";
 import { Toaster } from "react-hot-toast";
+import PostureDetector from "../Components/PostureDetection";
+import PostureAnalyzer from "../Components/PostureAnalyzer";
+
 const Routing = () => {
   return (
     <motion.div>
       <ScrollToTop>
         <Routes>
+          <Route path="/posture-detection" element={<PostureAnalyzer/>}/>
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/" element={<AuthPage />} />
           <Route path="/camera" element={<CameraPage />} />
           <Route path="/home" element={<Home />} />
