@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/icon-192x192.png', 'icons/icon-512x512.png'],
+      includeAssets: ['favicon.svg', 'icons/192x192.png', 'icons/logo.svg', 'icons/icon-512x512.png'],
       workbox: {
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB
       },
@@ -26,6 +26,11 @@ export default defineConfig({
             src: 'icons/192x192.png',
             sizes: '192x192',
             type: 'image/png'
+          },
+          {
+            src: 'icons/logo.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
           },
           {
             src: 'icons/icon-512x512.png',
