@@ -3,6 +3,21 @@
   padding: 70px 20px 20px; /* Space for top and bottom navbars */
 }
 
+.page-container.ai-fit-page.fullscreen-ai-fit,
+.auth-content.fullscreen-ai-fit,
+.auth-form.fullscreen-ai-fit {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  background: #000 !important;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .ai-fit-container {
   display: flex;
   flex-direction: column;
