@@ -18,6 +18,7 @@ const AIFit = () => {
         {!visible && (
           <div className="auth-welcome-text">
             <h2>EASY AI FITTING</h2>
+            <p style={{fontFamily:"GoodTimes",color:"white",margin:"10px",textDecoration:"underline"}}><b>BOTH THE ALGORITHMS ARE IN DEVELOPMENT PHASE AND MAY NOT PERFORM THE EXACT WAY </b></p>
             <p>
               Every body is different. Every stroke is unique. That's why we
               created over 2,000 putter configurations and a smart AI quiz to
