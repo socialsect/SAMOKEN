@@ -46,7 +46,7 @@ export default defineConfig({
   ],
   server: {
     host: true,
-    allowedHosts: ['bumpy-seas-poke.loca.lt']
+    allowedHosts: ['proud-wings-feel.loca.lt']
   },
   css: {
     postcss: undefined

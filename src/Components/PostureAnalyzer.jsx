@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import "../Styles/PostureAnalyzer.css";
 import { Pose } from '@mediapipe/pose';
+import html2canvas from 'html2canvas';
 
 const PostureAnalyzer = () => {
   const videoRef = useRef(null);
@@ -12,10 +13,13 @@ const PostureAnalyzer = () => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [loading, setLoading] = useState(false); // loading state
+  const [screenshot, setScreenshot] = useState(null);
+  const [showSave, setShowSave] = useState(false);
 
   useEffect(() => {
     const getDevices = async () => {
       try {
+        
         const allDevices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
         setDevices(videoDevices);
@@ -47,79 +51,103 @@ const PostureAnalyzer = () => {
     return pose;
   };
 
+  // Improved angle calculation (shoulder, hip, knee)
+  const calculateHipAngle = (landmarks) => {
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
+    const useRight = rightHip.x > leftHip.x;
+    const hip = useRight ? landmarks[24] : landmarks[23];
+    const knee = useRight ? landmarks[26] : landmarks[25];
+    const shoulder = useRight ? landmarks[12] : landmarks[11];
+    if (!hip || !knee || !shoulder) return 0;
+    const a = Math.hypot(hip.x - knee.x, hip.y - knee.y);
+    const b = Math.hypot(shoulder.x - hip.x, shoulder.y - hip.y);
+    const c = Math.hypot(shoulder.x - knee.x, shoulder.y - knee.y);
+    // Law of cosines
+    const angle = Math.acos((a*a + b*b - c*c) / (2*a*b)) * (180/Math.PI);
+    return angle.toFixed(1);
+  };
+
+  // Enhanced overlay drawing with posture and angle labels on canvas
+  const drawOverlay = (ctx, landmarks, angle, posture) => {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    // Decide which side is more visible (left or right)
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
+    // If right hip is further right on the image, use right side; else use left
+    const useRight = rightHip.x > leftHip.x;
+    const points = useRight ? [12, 24, 26, 28] : [11, 23, 25, 27]; // shoulder, hip, knee, ankle
+    // Draw red lines: shoulder-hip, hip-knee, knee-ankle
+    ctx.strokeStyle = '#FF0000';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(landmarks[points[0]].x * width, landmarks[points[0]].y * height);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(landmarks[points[i]].x * width, landmarks[points[i]].y * height);
+    }
+    ctx.stroke();
+    // Draw head circle
+    ctx.beginPath();
+    ctx.arc(landmarks[0].x * width, landmarks[0].y * height, 0.09 * width, 0, 2 * Math.PI);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#fff';
+    ctx.stroke();
+    // Draw angle arc at hip (always on inside of back)
+    const hip = landmarks[points[1]];
+    const knee = landmarks[points[2]];
+    const shoulder = landmarks[points[0]];
+    const cx = hip.x * width;
+    const cy = hip.y * height;
+    const v1 = { x: shoulder.x - hip.x, y: shoulder.y - hip.y };
+    const v2 = { x: knee.x - hip.x, y: knee.y - hip.y };
+    let start = Math.atan2(v1.y, v1.x);
+    let end = Math.atan2(v2.y, v2.x);
+    // Cross product to determine direction
+    const cross = v1.x * v2.y - v1.y * v2.x;
+    if (cross < 0) {
+      // Swap start and end to always draw inside angle
+      [start, end] = [end, start];
+    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40, start, end, false);
+    ctx.strokeStyle = '#FF0000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    // Draw angle text near hip (GoodTimes font)
+    ctx.save();
+    ctx.font = 'bold 32px GoodTimes, Arial, sans-serif';
+    ctx.fillStyle = '#FF0000';
+    ctx.textAlign = 'center';
+    // Place label on the bisector of the angle
+    const bisect = (start + end) / 2;
+    ctx.fillText(`${angle}°`, cx + 60 * Math.cos(bisect), cy + 60 * Math.sin(bisect) - 10);
+    ctx.restore();
+    // Draw posture label at top center (GoodTimes font)
+    ctx.save();
+    ctx.font = 'bold 32px GoodTimes, Arial, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 8;
+    ctx.fillText(`${posture}`, width / 2, 48);
+    ctx.restore();
+  };
+
   const onResults = (results) => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    // Always sync canvas size to video size
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (results.poseLandmarks) {
-      drawLandmarks(ctx, results.poseLandmarks);
-      const calculatedAngle = calculateBackAngle(results.poseLandmarks);
+      const calculatedAngle = calculateHipAngle(results.poseLandmarks);
       const label = classifyPosture(calculatedAngle);
+      drawOverlay(ctx, results.poseLandmarks, calculatedAngle, label);
       setAngle(calculatedAngle);
       setPosture(label);
-      // drawPostureLabel(ctx, label, calculatedAngle); // REMOVE this line
     }
-  };
-
-  const drawLandmarks = (ctx, landmarks) => {
-    const canvas = canvasRef.current;
-    const width = canvas.width;
-    const height = canvas.height;
-    ctx.beginPath();
-    ctx.moveTo(width / 2, 0);
-    ctx.lineTo(width / 2, height);
-    ctx.strokeStyle = '#00FFFF';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    const leftHip = landmarks[23];
-    const rightHip = landmarks[24];
-    const nose = landmarks[0];
-    const midHip = {
-      x: (leftHip.x + rightHip.x) / 2,
-      y: (leftHip.y + rightHip.y) / 2
-    };
-    ctx.beginPath();
-    ctx.moveTo(midHip.x * width, midHip.y * height);
-    ctx.lineTo(nose.x * width, nose.y * height);
-    ctx.strokeStyle = '#FF0000';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = '#00FF00';
-    landmarks.forEach(lm => {
-      ctx.beginPath();
-      ctx.arc(lm.x * width, lm.y * height, 4, 0, 2 * Math.PI);
-      ctx.fill();
-    });
-  };
-
-  // Remove drawPostureLabel from canvas drawing
-  const drawPostureLabel = (ctx, posture, angle) => {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(20, 20, 250, 60);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '18px Arial';
-    ctx.fillText(`Posture: ${posture}`, 30, 45);
-    ctx.fillText(`Angle: ${angle}°`, 30, 70);
-  };
-
-  const calculateBackAngle = (landmarks) => {
-    const leftHip = landmarks[23];
-    const rightHip = landmarks[24];
-    const nose = landmarks[0];
-    if (!leftHip || !rightHip || !nose) return 0;
-    const midHip = {
-      x: (leftHip.x + rightHip.x) / 2,
-      y: (leftHip.y + rightHip.y) / 2,
-    };
-    const dx = nose.x - midHip.x;
-    const dy = nose.y - midHip.y;
-    let angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    angle = 90 - angle;
-    return Math.abs(angle).toFixed(1);
   };
 
   const classifyPosture = (angle) => {
@@ -177,6 +205,34 @@ const PostureAnalyzer = () => {
     setAngle(0);
   };
 
+  // ANALYSE button handler (composite video + overlay)
+  const handleAnalyse = async () => {
+    const video = videoRef.current;
+    const overlay = canvasRef.current;
+    if (!video || !overlay) return;
+    // Create a temp canvas
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = video.videoWidth;
+    tempCanvas.height = video.videoHeight;
+    const ctx = tempCanvas.getContext('2d');
+    // Draw video frame
+    ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+    // Draw overlay
+    ctx.drawImage(overlay, 0, 0, tempCanvas.width, tempCanvas.height);
+    // Export as image
+    setScreenshot(tempCanvas.toDataURL('image/png'));
+    setShowSave(true);
+  };
+
+  // Save screenshot
+  const handleSave = () => {
+    if (!screenshot) return;
+    const link = document.createElement('a');
+    link.href = screenshot;
+    link.download = 'Runner.golf posture analyser.png';
+    link.click();
+  };
+
   return (
     <div className="posture-analyzer">
       {loading && (
@@ -185,44 +241,46 @@ const PostureAnalyzer = () => {
           <div style={{ color: '#fff', marginTop: 16, fontSize: 18 }}>Loading model...</div>
         </div>
       )}
-      <div className="posture-video-container" style={{ display: loading ? 'none' : 'block' }}>
-        <div className="overlay-control overlay-top-right">
-          <select
-            value={selectedDeviceId}
-            onChange={e => setSelectedDeviceId(e.target.value)}
-            disabled={isProcessing}
-          >
-            {devices.map(device => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label || `Camera ${device.deviceId}`}
-              </option>
-            ))}
-          </select>
-        </div>
-        <video ref={videoRef} className="posture-video" autoPlay playsInline muted />
-        <canvas ref={canvasRef} className="posture-canvas" />
-        <div className="overlay-control overlay-top-left">
-          {!isProcessing ? (
-            <button onClick={startCamera}>Start Camera</button>
-          ) : (
-            <button onClick={stopCamera}>Stop Camera</button>
-          )}
-        </div>
-        {error && <p className="error overlay-top-left" style={{ top: 70, left: 20 }}>{error}</p>}
-        {/* Modern metrics overlay at bottom center */}
-        {isProcessing && (
-          <div className="metrics-overlay">
-            <div className="metrics-box">
-              <div className="metrics-label">Posture</div>
-              <div className="metrics-value">{posture || 'Detecting...'}</div>
-            </div>
-            <div className="metrics-box">
-              <div className="metrics-label">Back Angle</div>
-              <div className="metrics-value">{angle}°</div>
-            </div>
+      <div className="posture-video-container" style={{ display: loading ? 'none' : 'block', position: 'relative' }}>
+        {/* Show dropdown and Start Camera button only if not processing */}
+        {!isProcessing && !screenshot && (
+          <div className="pre-camera-ui">
+            <select
+              className="custom-dropdown"
+              value={selectedDeviceId}
+              onChange={e => setSelectedDeviceId(e.target.value)}
+              style={{ marginBottom: 24 }}
+            >
+              {devices.map(device => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Camera ${device.deviceId}`}
+                </option>
+              ))}
+            </select>
+            <button className="start-btn" onClick={startCamera}>Start Camera</button>
           </div>
         )}
+        {/* Video and canvas always present */}
+        <video ref={videoRef} className="posture-video" autoPlay playsInline muted />
+        <canvas ref={canvasRef} className="posture-canvas" />
+        {/* Show Stop Camera button only if processing */}
+        {isProcessing && !screenshot && (
+          <button className="stop-btn" onClick={stopCamera}>Stop Camera</button>
+        )}
+        {/* Show Analyse button only if processing */}
+        {isProcessing && !screenshot && (
+          <div className="analyse-btn-container">
+            <button className="analyse-btn" onClick={handleAnalyse}>ANALYSE</button>
+          </div>
+        )}
+        {error && <p className="error overlay-top-left" style={{ top: 70, left: 20 }}>{error}</p>}
       </div>
+      {screenshot && (
+        <div className="screenshot-preview">
+          <img src={screenshot} alt="Posture Analysis Screenshot" style={{ width: '100%', borderRadius: 16, marginTop: 16 }} />
+          {showSave && <button className="save-btn" onClick={handleSave}>Save</button>}
+        </div>
+      )}
     </div>
   );
 };
