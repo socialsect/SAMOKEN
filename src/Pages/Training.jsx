@@ -36,8 +36,5 @@ const Training = () => {
         </div>
       </div>
       <BottomNavbar/>
-    </div>
-  );
-};
-
+    </div>);}
 export default Training;
