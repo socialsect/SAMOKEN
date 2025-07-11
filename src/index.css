@@ -71,7 +71,7 @@ h1, h2, .heading {
 }
 
 
-.button {
+/* .button {
   font-family: var(--font-body);
   background: var(--runner-red);
   color: var(--runner-white);
@@ -83,7 +83,7 @@ h1, h2, .heading {
 .button:hover {
   background: var(--runner-darkred);
   box-shadow: var(--shadow-hard);
-}
+} */
 
 /* === Font Faces === */
 @font-face {
