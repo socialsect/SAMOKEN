@@ -38,7 +38,7 @@ const Routing = () => {
           {/* Catch-all route for 404 */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
-          <Route path="/chatbot" element={<Chatbot />} />
+          {/* <Route path="/chatbot" element={<Chatbot />} /> */}
           <Route path="/profile" element={<Profile />} />
         </Routes>
         {/* <Camera /> */}
