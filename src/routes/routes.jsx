@@ -17,7 +17,7 @@ import AuthCallback from "../Pages/AuthCallback";
 import { Toaster } from "react-hot-toast";
 import PostureDetector from "../Components/PostureDetection";
 import PostureAnalyzer from "../Components/PostureAnalyzer";
-import Chatbot from "../Components/Chatbot";
+// import Chatbot from "../Components/Chatbot";
 import Profile from "../Pages/profile";
 
 const Routing = () => {
