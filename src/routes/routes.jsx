@@ -19,6 +19,8 @@ import PostureDetector from "../Components/PostureDetection";
 import PostureAnalyzer from "../Components/PostureAnalyzer";
 // import Chatbot from "../Components/Chatbot";
 import Profile from "../Pages/profile";
+import StrokeArcAnalyzer from "../Pages/Stroke";
+import { StrokeProvider } from "../contexts/StrokeContext";
 
 const Routing = () => {
   return (
@@ -40,6 +42,7 @@ const Routing = () => {
           <Route path="*" element={<Navigate to="/404" replace />} />
           {/* <Route path="/chatbot" element={<Chatbot />} /> */}
           <Route path="/profile" element={<Profile />} />
+          <Route path="/stroke" element={<StrokeProvider><StrokeArcAnalyzer /></StrokeProvider>} />
         </Routes>
         {/* <Camera /> */}
         <Toaster
