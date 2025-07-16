@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import '../Styles/topNavbar.css';
 import { IoCloseOutline } from "react-icons/io5";
 
 const TopNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -28,14 +29,19 @@ const TopNavbar = () => {
             height="auto"
           />
         </Link>
-        
-        <div className="profile-container">
-          <img 
-            src="/icons/profile-placeholder.svg" 
-            alt="Profile" 
-            className="profile-image"
-          />
-        </div>
+        {location.pathname === "/profile" ? (
+          <img src="/icons/setting.png" alt="Settings" className="profile-settings-icon" />
+        ) : (
+          <Link to="/profile" >
+            <div className="profile-container">
+              <img 
+                src="/icons/profile-placeholder.svg" 
+                alt="Profile" 
+                className="profile-image"
+              />
+            </div>
+          </Link>
+        )}
       </nav>
 
       {/* Full-screen Menu */}

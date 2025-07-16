@@ -3,6 +3,7 @@ import TopNavbar from "../Components/TopNavbar";
 import BottomNavbar from "../Components/BottomNavbar";
 import "../Styles/home.css";
 import { Link } from "react-router-dom";
+import { usePuttingMetrics } from "../contexts/PuttingMetricsContext";
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
@@ -46,6 +47,9 @@ const Home = () => {
       });
     }
   }, [currentSlide]);
+
+  const { puttingMetrics } = usePuttingMetrics();
+
   return (
     <div className="home-container">
       <TopNavbar />
@@ -189,29 +193,35 @@ const Home = () => {
           <span className="highlight">MY</span> PUTTING
         </h3>
         <div className="stats">
-          <div className="stat-box">
-            <p className="label">
-              <span className="highlight">MY</span> ARC TYPE
-            </p>
-            <img src="/images/arc.png" alt="Arc Type" className="arc-img" />
-            <p className="value paragraph">square to slight arc</p>
-          </div>
-          <div className="stat-box">
-            <p className="label">
-              <span className="highlight">MY</span> AVG. FACE ANGLE
-            </p>
-            <p className="value">
-              0,4° <span className="red">R</span>
-            </p>
-          </div>
-          <div className="stat-box">
-            <p className="label">
-              <span className="highlight">MY</span> AVG. BALL DIRECTION
-            </p>
-            <p className="value">
-              0,6° <span className="red">L</span>
-            </p>
-          </div>
+          {puttingMetrics.arcType && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> ARC TYPE
+              </p>
+              <img src="/images/arc.png" alt="Arc Type" className="arc-img" />
+              <p className="value paragraph">square to slight arc</p>
+            </div>
+          )}
+          {puttingMetrics.faceAngle && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> AVG. FACE ANGLE
+              </p>
+              <p className="value">
+                0,4° <span className="red">R</span>
+              </p>
+            </div>
+          )}
+          {puttingMetrics.ballDirection && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> AVG. BALL DIRECTION
+              </p>
+              <p className="value">
+                0,6° <span className="red">L</span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

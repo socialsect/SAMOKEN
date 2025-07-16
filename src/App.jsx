@@ -6,38 +6,41 @@ import { AuthProvider } from "./contexts/AuthContext";
 import TopNavbar from "./Components/TopNavbar";
 import BottomNavbar from "./Components/BottomNavbar";
 import { motion } from "framer-motion";
+import { PuttingMetricsProvider } from "./contexts/PuttingMetricsContext";
 
 const App = () => {
   return (
     <motion.div className="App">
-      <AuthProvider>
-        {/* <TopNavbar /> */}
-        <main className="main-content">
-          <Routing />
-        </main>
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            success: {
-              duration: 3000,
-              style: {
-                fontFamily: "Avenir",
-                background: "#4BB543",
-                color: "#fff",
+      <PuttingMetricsProvider>
+        <AuthProvider>
+          {/* <TopNavbar /> */}
+          <main className="main-content">
+            <Routing />
+          </main>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              success: {
+                duration: 3000,
+                style: {
+                  fontFamily: "Avenir",
+                  background: "#4BB543",
+                  color: "#fff",
+                },
               },
-            },
-            error: {
-              duration: 4000,
-              style: {
-                fontFamily: "Avenir",
-                background: "#ff4444",
-                color: "#fff",
+              error: {
+                duration: 4000,
+                style: {
+                  fontFamily: "Avenir",
+                  background: "#ff4444",
+                  color: "#fff",
+                },
               },
-            },
-          }}
-        />
-        {/* <BottomNavbar /> */}
-      </AuthProvider>
+            }}
+          />
+          {/* <BottomNavbar /> */}
+        </AuthProvider>
+      </PuttingMetricsProvider>
     </motion.div>
   );
 };

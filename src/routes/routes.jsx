@@ -17,6 +17,8 @@ import AuthCallback from "../Pages/AuthCallback";
 import { Toaster } from "react-hot-toast";
 import PostureDetector from "../Components/PostureDetection";
 import PostureAnalyzer from "../Components/PostureAnalyzer";
+import Chatbot from "../Components/Chatbot";
+import Profile from "../Pages/profile";
 
 const Routing = () => {
   return (
@@ -36,6 +38,8 @@ const Routing = () => {
           {/* Catch-all route for 404 */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
+          <Route path="/chatbot" element={<Chatbot />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
         {/* <Camera /> */}
         <Toaster
