@@ -222,6 +222,34 @@ const Home = () => {
               </p>
             </div>
           )}
+          {puttingMetrics.strokeRatio && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> STROKE RATIO
+              </p>
+              <p className="value">1:1</p>
+            </div>
+          )}
+          {puttingMetrics.dynamicControl && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> DYNAMIC CONTROL
+              </p>
+              <p className="value">
+                78 <span className="red">%</span>
+              </p>
+            </div>
+          )}
+          {puttingMetrics.puttPerformance && (
+            <div className="stat-box">
+              <p className="label">
+                <span className="highlight">MY</span> PUTT PERFORMANCE
+              </p>
+              <p className="value">
+                84 <span className="red">%</span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

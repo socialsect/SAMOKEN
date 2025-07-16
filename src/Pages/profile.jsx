@@ -1,18 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import "../Styles/profile.css";
 import TopNavbar from "../Components/TopNavbar";
 import { usePuttingMetrics } from "../contexts/PuttingMetricsContext";
 
 const Profile = () => {
   const { puttingMetrics, updateMetric } = usePuttingMetrics();
+  const [showFullImage, setShowFullImage] = useState(false);
 
   return (
     <div className="profile-page-container profile-page-with-navbar-gap">
       <TopNavbar />
 
+      {/* Disclaimer for user experience */}
+   
+
       {/* Profile Info */}
       <div className="profile-info">
-        <img src="/images/simon.png" alt="Profile" className="profile-avatar" />
+        <img
+          src="/images/simon.png"
+          alt="Profile"
+          className="profile-avatar"
+          style={{ cursor: 'pointer' }}
+          onClick={() => setShowFullImage(true)}
+        />
         <div className="profile-info-details">
           <div className="profile-name">SIMON</div>
           <div className="profile-level">ADVANCED</div>
@@ -26,6 +36,18 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      <div className="putting-disclaimer">
+        <small>
+          <span role="img" aria-label="info">ℹ️</span> Check the boxes below to choose which metrics are displayed in the MY PUTTING section on your homepage.
+        </small>
+      </div>
+      {/* Fullscreen Image Modal */}
+      {showFullImage && (
+        <div className="profile-img-modal" onClick={() => setShowFullImage(false)}>
+          <img src="/images/simon.png" alt="Profile Fullscreen" className="profile-img-fullscreen" />
+          <button className="profile-img-close" onClick={() => setShowFullImage(false)}>&times;</button>
+        </div>
+      )}
 
       {/* MY PUTTING SECTION */}
       <div className="profile-section">

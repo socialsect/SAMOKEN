@@ -260,4 +260,61 @@
   display: inline !important;
   line-height: 1 !important;
 }
+
+.putting-disclaimer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin: 1.2rem auto 0.5rem auto; */
+  padding: 0.7rem 1.2rem;
+  background: rgba(255,255,255,0.07);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #fff;
+  max-width: 500px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+}
+.putting-disclaimer small {
+  width: 100%;
+  text-align: center;
+}
+
+.profile-img-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.profile-img-fullscreen {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.5);
+  object-fit: contain;
+}
+.profile-img-close {
+  position: absolute;
+  top: 32px;
+  right: 40px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  border: none;
+  font-size: 2.5rem;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.profile-img-close:hover {
+  background: #e53935;
+}
   

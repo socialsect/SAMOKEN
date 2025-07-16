@@ -84,6 +84,14 @@
   background-color: transparent;
 }
 
+.profile-settings-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  margin-left: 8px;
+  margin-right: 2px;
+}
+
 /* Fullscreen Menu */
 .fullscreen-menu {
   position: fixed;
