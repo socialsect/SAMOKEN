@@ -54,7 +54,7 @@ const TopNavbar = () => {
             <Link to="/home" className="menu-item" onClick={toggleMenu}>Home</Link>
             <Link to="/training" className="menu-item" onClick={toggleMenu}>Train</Link>
             <Link to="/ai-fit" className="menu-item" onClick={toggleMenu}>AI Fit</Link>
-            <Link to="/settings" className="menu-item" onClick={toggleMenu}>Settings</Link>
+            <Link to="/set" className="menu-item" onClick={toggleMenu}>Set</Link>
           </nav>
         </div>
       </div>

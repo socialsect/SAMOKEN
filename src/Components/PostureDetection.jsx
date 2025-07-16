@@ -2,19 +2,20 @@ import React, { useRef, useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
-import * as tf from '@tensorflow/tfjs-core';  // Add this import
-import '@tensorflow/tfjs-backend-webgl';     // Ensure this import exists
+import * as tf from '@tensorflow/tfjs-core';
+
 const PostureDetector = () => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [posture, setPosture] = useState("Detecting...");
+  const [angle, setAngle] = useState(null);
   const [detector, setDetector] = useState(null);
 
   useEffect(() => {
     const loadModel = async () => {
-      await tf.setBackend('webgl');      // ✅ Explicitly set backend
-      await tf.ready();                  // ✅ Wait for backend initialization
-  
+      await tf.setBackend('webgl');
+      await tf.ready();
+
       const detector = await poseDetection.createDetector(
         poseDetection.SupportedModels.MoveNet,
         {
@@ -23,7 +24,7 @@ const PostureDetector = () => {
       );
       setDetector(detector);
     };
-  
+
     loadModel();
   }, []);
 
@@ -52,20 +53,23 @@ const PostureDetector = () => {
   };
 
   const classifyPosture = (pose) => {
-    const leftShoulder = pose.keypoints.find(k => k.name === "left_shoulder");
-    const leftHip = pose.keypoints.find(k => k.name === "left_hip");
+    const shoulder = pose.keypoints.find(k => k.name === "left_shoulder");
+    const hip = pose.keypoints.find(k => k.name === "left_hip");
 
-    if (!leftShoulder || !leftHip || leftShoulder.score < 0.5 || leftHip.score < 0.5) {
+    if (!shoulder || !hip || shoulder.score < 0.5 || hip.score < 0.5) {
       return setPosture("Not visible");
     }
 
-    const dy = leftShoulder.y - leftHip.y;
-    const dx = leftShoulder.x - leftHip.x;
-    const angle = Math.abs(Math.atan2(dy, dx) * (180 / Math.PI)); // convert to degrees
+    const dy = shoulder.y - hip.y;
+    const dx = shoulder.x - hip.x;
+    let rawAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle w.r.t horizontal
+    let verticalAngle = 90 - Math.abs(rawAngle);         // Vertical reference
 
-    if (angle > 70) setPosture("Crouched");
-    else if (angle > 40) setPosture("Normal");
-    else setPosture("Upright");
+    setAngle(verticalAngle.toFixed(1));
+
+    if (verticalAngle < 10) setPosture("Upright");
+    else if (verticalAngle <= 30) setPosture("Normal");
+    else setPosture("Crouched");
   };
 
   const drawOverlay = (pose) => {
@@ -77,55 +81,62 @@ const PostureDetector = () => {
     canvas.height = video.videoHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Vertical reference line (center)
-    ctx.strokeStyle = "lime";
-    ctx.lineWidth = 2;
+    // Draw vertical reference line
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(canvas.width / 2, 0);
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
 
-    // Draw keypoints
-    pose.keypoints.forEach(k => {
-      if (k.score > 0.5) {
-        ctx.beginPath();
-        ctx.arc(k.x, k.y, 4, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
-      }
-    });
+    // Draw shoulder to hip line
+    const shoulder = pose.keypoints.find(k => k.name === "left_shoulder");
+    const hip = pose.keypoints.find(k => k.name === "left_hip");
+    if (shoulder && hip && shoulder.score > 0.5 && hip.score > 0.5) {
+      ctx.beginPath();
+      ctx.moveTo(shoulder.x, shoulder.y);
+      ctx.lineTo(hip.x, hip.y);
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw circle on shoulder
+      ctx.beginPath();
+      ctx.arc(shoulder.x, shoulder.y, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "white";
+      ctx.fill();
+
+      // Draw angle text
+      ctx.fillStyle = "red";
+      ctx.font = "24px GoodTimes, sans-serif";
+      ctx.fillText(`${angle}°`, shoulder.x + 10, shoulder.y);
+    }
   };
 
   return (
-    <div style={{ position: "relative", width: "640px", height: "480px" }}>
+    <div style={{ position: "relative", width: "100%", maxWidth: "640px", margin: "0 auto" }}>
       <Webcam
         ref={webcamRef}
-        style={{
-          position: "absolute",
-          width: "640px",
-          height: "480px",
-        }}
+        style={{ position: "absolute", width: "100%", height: "auto" }}
         mirrored
       />
       <canvas
         ref={canvasRef}
-        style={{
-          position: "absolute",
-          width: "640px",
-          height: "480px",
-        }}
+        style={{ position: "absolute", width: "100%", height: "auto" }}
       />
       <div style={{
         position: "absolute",
-        bottom: 10,
+        top: 10,
         left: 10,
-        background: "#000",
-        color: "#0f0",
-        padding: "8px 12px",
+        padding: "10px 14px",
+        background: "rgba(0, 0, 0, 0.7)",
+        color: "#FF0000",
+        fontFamily: "GoodTimes, sans-serif",
+        fontSize: "20px",
         borderRadius: "8px",
-        fontWeight: "bold"
+        zIndex: 10
       }}>
-        Posture: {posture}
+        {posture.toUpperCase()}
       </div>
     </div>
   );

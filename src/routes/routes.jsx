@@ -20,13 +20,16 @@ import PostureAnalyzer from "../Components/PostureAnalyzer";
 // import Chatbot from "../Components/Chatbot";
 import Profile from "../Pages/profile";
 import StrokeArcAnalyzer from "../Pages/Stroke";
+
 import { StrokeProvider } from "../contexts/StrokeContext";
+import PostureDataCollector from "../Pages/collector";
 
 const Routing = () => {
   return (
     <motion.div>
       <ScrollToTop>
         <Routes>
+          <Route path="/collector" element={<PostureDataCollector/>}/>
           <Route path="/posture-detection" element={<PostureAnalyzer/>}/>
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/" element={<AuthPage />} />
