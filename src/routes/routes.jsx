@@ -23,7 +23,7 @@ import StrokeArcAnalyzer from "../Pages/Stroke";
 
 import { StrokeProvider } from "../contexts/StrokeContext";
 import PostureDataCollector from "../Pages/collector";
-
+import SAMPLE from "../Pages/sample";
 const Routing = () => {
   return (
     <motion.div>
@@ -40,6 +40,7 @@ const Routing = () => {
           <Route path="/set" element={<Settings />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="testing" element={<SAMPLE/>}/>
           {/* Catch-all route for 404 */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
