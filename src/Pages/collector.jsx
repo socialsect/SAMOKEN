@@ -12,8 +12,7 @@ const PostureAnalyzer = () => {
   const smoothingBuffer = useRef([]);
 
   const [posture, setPosture] = useState('Detecting...');
-  const [facingMode, setFacingMode] = useState('user');
-
+  const [facingMode, setFacingMode] = useState('environment');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -53,20 +52,26 @@ const PostureAnalyzer = () => {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
     }
 
+    const video = videoRef.current;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { exact: facingMode },
-          width: { ideal: window.innerWidth },
-          height: { ideal: window.innerHeight },
+          facingMode: { ideal: facingMode },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
         },
         audio: false,
       });
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+      video.srcObject = stream;
+
+      await new Promise(resolve => {
+        video.onloadedmetadata = () => {
+          video.play();
+          resolve();
+        };
+      });
     } catch (err) {
       console.error('Camera access error:', err);
       setError('Camera access failed. Please allow permissions and refresh.');
@@ -79,11 +84,6 @@ const PostureAnalyzer = () => {
     const ctx = canvas.getContext('2d');
 
     const processFrame = async () => {
-      if (!video || video.readyState < 2) {
-        requestAnimationFrame(processFrame);
-        return;
-      }
-
       const poses = await detectorRef.current.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -113,6 +113,11 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
+  const normalizeKeypoint = (point, vw, vh, cw, ch) => ({
+    x: (point.x / vw) * cw,
+    y: (point.y / vh) * ch,
+  });
+
   const getKeypoint = (keypoints, primary, fallback) => {
     const p = keypoints.find(k => k.name === primary && k.score > 0.6);
     return p || keypoints.find(k => k.name === fallback && k.score > 0.6);
@@ -123,8 +128,16 @@ const PostureAnalyzer = () => {
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
     if (!shoulder || !hip) return null;
 
-    const dx = shoulder.x - hip.x;
-    const dy = shoulder.y - hip.y;
+    const vw = videoRef.current.videoWidth || 640;
+    const vh = videoRef.current.videoHeight || 480;
+    const cw = canvasRef.current.width;
+    const ch = canvasRef.current.height;
+
+    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
+
+    const dx = ns.x - nh.x;
+    const dy = ns.y - nh.y;
     const magnitude = Math.sqrt(dx * dx + dy * dy);
     if (magnitude === 0) return null;
 
@@ -144,9 +157,17 @@ const PostureAnalyzer = () => {
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
     if (!shoulder || !hip) return;
 
+    const vw = videoRef.current.videoWidth || 640;
+    const vh = videoRef.current.videoHeight || 480;
+    const cw = canvasRef.current.width;
+    const ch = canvasRef.current.height;
+
+    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
+
     ctx.beginPath();
-    ctx.moveTo(shoulder.x, shoulder.y);
-    ctx.lineTo(hip.x, hip.y);
+    ctx.moveTo(ns.x, ns.y);
+    ctx.lineTo(nh.x, nh.y);
     ctx.strokeStyle = 'aqua';
     ctx.lineWidth = 4;
     ctx.stroke();
@@ -155,7 +176,7 @@ const PostureAnalyzer = () => {
     ctx.font = '16px Arial';
     ctx.fillText(`Posture: ${postureLabel} | Angle: ${angle.toFixed(1)}°`, 10, 30);
 
-    drawArrow(ctx, hip, shoulder, 'red');
+    drawArrow(ctx, nh, ns, 'red');
   };
 
   const drawArrow = (ctx, from, to, color) => {
@@ -188,7 +209,7 @@ const PostureAnalyzer = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '10px' }}>
+    <div style={{ textAlign: 'center', padding: '10px', maxWidth: '100%' }}>
       <h2 style={{ fontSize: '1.2rem' }}>Current Posture: {posture}</h2>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -209,38 +230,42 @@ const PostureAnalyzer = () => {
         <option value="user">🤳 Front Camera</option>
       </select>
 
-      <div style={{ position: 'relative', display: 'inline-block' }}>
-      <video
-  ref={videoRef}
-  autoPlay
-  playsInline
-  muted
-  style={{
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-    zIndex: 1,
-  }}
-/>
-
-<canvas
-  ref={canvasRef}
-  width="640"
-  height="480"
-  style={{
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: 2,
-  }}
-/>
-
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '4 / 3',
+          maxWidth: '640px',
+          margin: '0 auto',
+        }}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0,
+            zIndex: 1,
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 2,
+          }}
+        />
       </div>
     </div>
   );
