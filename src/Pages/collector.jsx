@@ -12,7 +12,7 @@ const PostureAnalyzer = () => {
   const smoothingBuffer = useRef([]);
 
   const [posture, setPosture] = useState('Detecting...');
-  const [facingMode, setFacingMode] = useState('environment'); // 'user' or 'environment'
+  const [facingMode, setFacingMode] = useState('environment');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -52,26 +52,20 @@ const PostureAnalyzer = () => {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
     }
 
-    const video = videoRef.current;
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: facingMode },
+          facingMode: { exact: facingMode },
           width: { ideal: 640 },
           height: { ideal: 480 },
         },
         audio: false,
       });
 
-      video.srcObject = stream;
-
-      await new Promise(resolve => {
-        video.onloadedmetadata = () => {
-          video.play();
-          resolve();
-        };
-      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
     } catch (err) {
       console.error('Camera access error:', err);
       setError('Camera access failed. Please allow permissions and refresh.');
@@ -84,6 +78,11 @@ const PostureAnalyzer = () => {
     const ctx = canvas.getContext('2d');
 
     const processFrame = async () => {
+      if (!video || video.readyState < 2) {
+        requestAnimationFrame(processFrame);
+        return;
+      }
+
       const poses = await detectorRef.current.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -113,11 +112,6 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
-  const normalizeKeypoint = (point, vw, vh, cw, ch) => ({
-    x: (point.x / vw) * cw,
-    y: (point.y / vh) * ch,
-  });
-
   const getKeypoint = (keypoints, primary, fallback) => {
     const p = keypoints.find(k => k.name === primary && k.score > 0.6);
     return p || keypoints.find(k => k.name === fallback && k.score > 0.6);
@@ -128,16 +122,8 @@ const PostureAnalyzer = () => {
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
     if (!shoulder || !hip) return null;
 
-    const vw = videoRef.current.videoWidth || 640;
-    const vh = videoRef.current.videoHeight || 480;
-    const cw = canvasRef.current.width;
-    const ch = canvasRef.current.height;
-
-    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
-    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
-
-    const dx = ns.x - nh.x;
-    const dy = ns.y - nh.y;
+    const dx = shoulder.x - hip.x;
+    const dy = shoulder.y - hip.y;
     const magnitude = Math.sqrt(dx * dx + dy * dy);
     if (magnitude === 0) return null;
 
@@ -157,17 +143,9 @@ const PostureAnalyzer = () => {
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
     if (!shoulder || !hip) return;
 
-    const vw = videoRef.current.videoWidth || 640;
-    const vh = videoRef.current.videoHeight || 480;
-    const cw = canvasRef.current.width;
-    const ch = canvasRef.current.height;
-
-    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
-    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
-
     ctx.beginPath();
-    ctx.moveTo(ns.x, ns.y);
-    ctx.lineTo(nh.x, nh.y);
+    ctx.moveTo(shoulder.x, shoulder.y);
+    ctx.lineTo(hip.x, hip.y);
     ctx.strokeStyle = 'aqua';
     ctx.lineWidth = 4;
     ctx.stroke();
@@ -176,7 +154,7 @@ const PostureAnalyzer = () => {
     ctx.font = '16px Arial';
     ctx.fillText(`Posture: ${postureLabel} | Angle: ${angle.toFixed(1)}°`, 10, 30);
 
-    drawArrow(ctx, nh, ns, 'red');
+    drawArrow(ctx, hip, shoulder, 'red');
   };
 
   const drawArrow = (ctx, from, to, color) => {
