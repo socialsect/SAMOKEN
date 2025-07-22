@@ -17,18 +17,13 @@ export default function FullscreenPostureAnalyzer() {
 
   useEffect(() => {
     (async () => {
-      try {
-        await tf.setBackend('webgl');
-        await tf.ready();
-        detectorRef.current = await posedetection.createDetector(
-          posedetection.SupportedModels.MoveNet,
-          { modelType: posedetection.movenet.modelType.LIGHTNING }
-        );
-        startCamera();
-      } catch (e) {
-        console.error(e);
-        setError('Failed to init pose detector');
-      }
+      await tf.setBackend('webgl');
+      await tf.ready();
+      detectorRef.current = await posedetection.createDetector(
+        posedetection.SupportedModels.MoveNet,
+        { modelType: posedetection.movenet.modelType.LIGHTNING }
+      );
+      startCamera();
     })();
     return stopCamera;
   }, []);
@@ -42,11 +37,7 @@ export default function FullscreenPostureAnalyzer() {
     stopCamera();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width:  640,
-          height: 480
-        },
+        video: { facingMode:{ideal: facingMode}, width:640, height:480 },
         audio: false
       });
       videoRef.current.srcObject = stream;
@@ -64,14 +55,12 @@ export default function FullscreenPostureAnalyzer() {
   }
 
   function stopCamera() {
-    videoRef.current?.srcObject
-      ?.getTracks()
-      .forEach(t => t.stop());
+    videoRef.current?.srcObject?.getTracks().forEach(t=>t.stop());
   }
 
   function resizeCanvas() {
     const v = videoRef.current, c = canvasRef.current;
-    if (!v || !c) return;
+    if (!v||!c) return;
     c.width  = v.videoWidth;
     c.height = v.videoHeight;
   }
@@ -79,216 +68,170 @@ export default function FullscreenPostureAnalyzer() {
   function detectLoop() {
     const v = videoRef.current, c = canvasRef.current, ctx = c.getContext('2d');
     const buf = [];
+    const flip = facingMode === 'user';
 
     async function frame() {
       if (!detectorRef.current || !v) return;
 
-      // cover-style math
+      // — cover‐style math —
       const vw = v.videoWidth, vh = v.videoHeight;
       const cw = c.width,       ch = c.height;
       const scale   = Math.max(cw/vw, ch/vh);
-      const offsetX = (cw - vw * scale) / 2;
-      const offsetY = (ch - vh * scale) / 2;
+      const offsetX = (cw - vw*scale)/2;
+      const offsetY = (ch - vh*scale)/2;
 
-      // clear & mirror if front camera
-      ctx.clearRect(0, 0, cw, ch);
-      if (facingMode === 'user') {
+      // 1) clear
+      ctx.clearRect(0,0,cw,ch);
+
+      // 2) draw video, flipped only if front camera
+      if (flip) {
         ctx.save();
-        ctx.scale(-1, 1);
-        ctx.translate(-cw, 0);
+        ctx.scale(-1,1);
+        ctx.translate(-cw,0);
       }
-
-      // draw video “cover”
-      ctx.drawImage(
-        v,
-        0, 0, vw, vh,
-        offsetX, offsetY,
-        vw * scale, vh * scale
+      ctx.drawImage(v,
+        0,0,vw,vh,
+        offsetX,offsetY,vw*scale,vh*scale
       );
+      if (flip) ctx.restore();
 
-      // pose estimation
+      // 3) pose estimate (on raw video coords)
       const poses = await detectorRef.current.estimatePoses(v);
       if (poses[0]) {
         const rawAngle = calculateBackAngle(poses[0].keypoints);
-        if (rawAngle != null) {
+        if (rawAngle!=null) {
           buf.push(rawAngle);
-          if (buf.length > SMOOTHING_BUFFER_SIZE) buf.shift();
-          const avg = buf.reduce((a,b) => a + b, 0) / buf.length;
-          const cat = categorizePosture(avg);
-          setPosture(`${cat} | ${avg.toFixed(1)}°`);
+          if (buf.length>SMOOTHING_BUFFER_SIZE) buf.shift();
+          const avg = buf.reduce((a,b)=>a+b,0)/buf.length;
+          setPosture(`${categorizePosture(avg)} | ${avg.toFixed(1)}°`);
 
-          // map keypoints into canvas coords
-          const kps = poses[0].keypoints.map(p => ({
-            x: p.x * scale + offsetX,
-            y: p.y * scale + offsetY,
-            name: p.name,
-            score: p.score
+          // 4) map keypoints into canvas coords
+          const kps = poses[0].keypoints.map(p=>({
+            x: p.x*scale + offsetX,
+            y: p.y*scale + offsetY,
+            name: p.name, score: p.score
           }));
 
-          // <-- NEW: draw all red guide‐lines & angle arc -->
+          // 5) draw your red lines & arc _in normal context_
           drawGuides(ctx, kps, rawAngle);
         }
       }
 
-      if (facingMode === 'user') ctx.restore();
       requestAnimationFrame(frame);
     }
-
     frame();
   }
 
-  // — HELPERS — unchanged except for new drawGuides below —
-
-  function getKeypoint(kps, primary, fallback) {
-    return (
-      kps.find(p => p.name === primary && p.score > 0.6) ||
-      kps.find(p => p.name === fallback && p.score > 0.6) ||
-      null
-    );
+  function getKeypoint(kps, prim, fall) {
+    return kps.find(p=>p.name===prim&&p.score>0.6)
+        || kps.find(p=>p.name===fall&&p.score>0.6)
+        || null;
   }
 
   function calculateBackAngle(kps) {
-    const s = getKeypoint(kps, 'left_shoulder', 'right_shoulder');
-    const h = getKeypoint(kps, 'left_hip',      'right_hip');
-    if (!s || !h) return null;
-    const dx = s.x - h.x, dy = s.y - h.y;
-    const m = Math.hypot(dx, dy);
-    if (m === 0) return null;
-    const dot = -dy; // vs. (0,-1)
-    return Math.acos(dot / m) * (180 / Math.PI);
+    const s = getKeypoint(kps,'left_shoulder','right_shoulder');
+    const h = getKeypoint(kps,'left_hip','right_hip');
+    if (!s||!h) return null;
+    const dx = s.x-h.x, dy = s.y-h.y, m = Math.hypot(dx,dy);
+    if (!m) return null;
+    return Math.acos(-dy/m)*(180/Math.PI);
   }
 
-  function categorizePosture(angle) {
-    return angle <= 10   ? 'Upright'
-         : angle <= 25   ? 'Normal'
-                         : 'Crouched';
+  function categorizePosture(a) {
+    return a<=10 ? 'Upright' : a<=25 ? 'Normal' : 'Crouched';
   }
 
-  /** NEW drawGuides: vertical line, spine line, angle arc **/
   function drawGuides(ctx, kps, rawAngle) {
-    const hip      = getKeypoint(kps, 'left_hip',    'right_hip');
-    const shoulder = getKeypoint(kps, 'left_shoulder','right_shoulder');
-    const ankle    = getKeypoint(kps, 'left_ankle',  'right_ankle');
-    if (!hip || !shoulder || !ankle) return;
+    const hip      = getKeypoint(kps,'left_hip','right_hip');
+    const shoulder = getKeypoint(kps,'left_shoulder','right_shoulder');
+    const ankle    = getKeypoint(kps,'left_ankle','right_ankle');
+    if (!hip||!shoulder||!ankle) return;
 
-    // 1) vertical leg line through ankle.x
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth   = 2;
+    // ✱ vertical leg line
+    ctx.strokeStyle='red'; ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.moveTo(ankle.x, 0);
-    ctx.lineTo(ankle.x, ctx.canvas.height);
+      ctx.moveTo(ankle.x,0);
+      ctx.lineTo(ankle.x,ctx.canvas.height);
     ctx.stroke();
 
-    // 2) spine line (hip→shoulder)
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth   = 4;
+    // ✱ spine line
+    ctx.strokeStyle='red'; ctx.lineWidth=4;
     ctx.beginPath();
-    ctx.moveTo(hip.x, hip.y);
-    ctx.lineTo(shoulder.x, shoulder.y);
+      ctx.moveTo(hip.x,hip.y);
+      ctx.lineTo(shoulder.x,shoulder.y);
     ctx.stroke();
 
-    // 3) angle arc at hip
-    const spineRad = Math.atan2(shoulder.y - hip.y, shoulder.x - hip.x);
-    const vertDown = Math.PI / 2; // downward vector
-    const r        = 40;          // radius of arc
+    // ✱ angle arc
+    const spineRad = Math.atan2(shoulder.y-hip.y, shoulder.x-hip.x);
+    const vertDown = Math.PI/2;
+    const r = 40;
+    ctx.strokeStyle='red'; ctx.lineWidth=3;
     ctx.beginPath();
-    ctx.lineWidth   = 3;
-    ctx.strokeStyle = 'red';
-    ctx.arc(
-      hip.x, hip.y,
-      r,
-      vertDown,
-      spineRad,
-      spineRad < vertDown
-    );
+      ctx.arc(hip.x, hip.y, r, vertDown, spineRad, spineRad<vertDown);
     ctx.stroke();
 
-    // 4) angle text
-    ctx.fillStyle = 'red';
-    ctx.font      = '14px Arial';
-    ctx.fillText(
-      `${rawAngle.toFixed(0)}°`,
-      hip.x + r + 4,
-      hip.y - 4
-    );
+    // ✱ angle label
+    ctx.fillStyle='red'; ctx.font='14px Arial';
+    ctx.fillText(`${rawAngle.toFixed(0)}°`, hip.x+r+4, hip.y-4);
   }
 
   return (
     <div style={{
-      position:   'fixed',
-      top:        0,
-      left:       0,
-      width:      '100vw',
-      height:     '100vh',
-      background: '#000',
-      overflow:   'hidden'
+      position:'fixed', top:0,left:0,
+      width:'100vw',height:'100vh',
+      background:'#000',overflow:'hidden'
     }}>
-      <video
-        ref={videoRef}
-        style={{ display: 'none' }}
-        playsInline muted autoPlay
-      />
+      <video ref={videoRef} style={{display:'none'}} playsInline muted autoPlay/>
       <canvas
         ref={canvasRef}
         style={{
-          position:   'absolute',
-          top:        0,
-          left:       '50%',
-          transform:  'translateX(-50%)',
-          height:     '100vh',
-          width:      'auto'
+          position:'absolute',
+          top:0,left:'50%',
+          transform:'translateX(-50%)',
+          height:'100vh', width:'auto'
         }}
       />
 
-      {/* UI overlay */}
+      {/* UI Overlay */}
       <div style={{
-        position:        'absolute',
-        top:             20,
-        left:            20,
-        right:           20,
-        display:         'flex',
-        justifyContent:  'space-between',
-        alignItems:      'center',
-        pointerEvents:   'none',
-        zIndex:          2
+        position:'absolute',
+        top:20,left:20,right:20,
+        display:'flex',justifyContent:'space-between',
+        alignItems:'center',
+        pointerEvents:'none', zIndex:2
       }}>
         <select
           value={facingMode}
-          onChange={e => setFacingMode(e.target.value)}
+          onChange={e=>setFacingMode(e.target.value)}
           style={{
-            pointerEvents: 'auto',
-            padding:       '6px 10px',
-            fontSize:      '1rem',
-            borderRadius:  '4px'
+            pointerEvents:'auto',
+            padding:'6px 10px',
+            fontSize:'1rem',
+            borderRadius:'4px'
           }}
         >
           <option value="user">🤳 Front</option>
           <option value="environment">📷 Back</option>
         </select>
         <div style={{
-          pointerEvents: 'none',
-          color:         '#fff',
-          fontSize:      '1.2rem',
-          background:    'rgba(0,0,0,0.5)',
-          padding:       '4px 8px',
-          borderRadius:  '4px'
+          pointerEvents:'none',
+          color:'#fff',
+          fontSize:'1.2rem',
+          background:'rgba(0,0,0,0.5)',
+          padding:'4px 8px',
+          borderRadius:'4px'
         }}>
-          {loading ? 'Loading…' : posture}
+          {loading? 'Loading…': posture}
         </div>
       </div>
 
       {error && (
         <div style={{
-          position:   'absolute',
-          bottom:     20,
-          left:       20,
-          right:      20,
-          color:      'red',
-          textAlign:  'center',
-          background: 'rgba(0,0,0,0.6)',
-          padding:    '6px 12px',
-          borderRadius: '4px',
-          zIndex:      2
+          position:'absolute',
+          bottom:20,left:20,right:20,
+          color:'red',textAlign:'center',
+          background:'rgba(0,0,0,0.6)',
+          padding:'6px 12px',borderRadius:'4px',zIndex:2
         }}>
           {error}
         </div>
