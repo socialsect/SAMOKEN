@@ -175,11 +175,14 @@ const SAMPLE = () => {
       <canvas
         ref={canvasRef}
         style={{
-          position:'absolute',
-          top:0, left:0,
-          width:'100%', height:'100%'
-        }}
-      />
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) scaleX(0.85)', // squash horizontally
+            transformOrigin: 'center center',
+            width: '100%',
+            height: '100%',
+          }}  />
 
       {/* UI overlay—matching your previous look */}
       <div style={{
