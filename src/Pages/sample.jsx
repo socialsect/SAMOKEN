@@ -81,36 +81,30 @@ export default function FullscreenPostureAnalyzer() {
     const buf = [];
 
     async function frame() {
-      if (!v || v.readyState < 2) return requestAnimationFrame(frame);
+      if (!detectorRef.current || !v) return;
 
+      // cover-style math
       const vw = v.videoWidth, vh = v.videoHeight;
-      const cw = c.width, ch = c.height;
-      
-      // Calculate scaling to fit video within canvas while maintaining aspect ratio
-      const scale = Math.min(cw / vw, ch / vh);
-      const scaledWidth = vw * scale;
-      const scaledHeight = vh * scale;
-      const offsetX = (cw - scaledWidth) / 2;
-      const offsetY = (ch - scaledHeight) / 2;
+      const cw = c.width,       ch = c.height;
+      const scale   = Math.max(cw/vw, ch/vh);
+      const offsetX = (cw - vw*scale) / 2;
+      const offsetY = (ch - vh*scale) / 2;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, cw, ch);
-      
-      // Save context state for mirroring if using front camera
+      // clear & mirror if front camera
+      ctx.clearRect(0,0,cw,ch);
       if (facingMode === 'user') {
         ctx.save();
-        ctx.scale(-1, 1);
-        ctx.translate(-cw, 0);
+        ctx.scale(-1,1);
+        ctx.translate(-cw,0);
       }
 
-      // Draw video centered and scaled to fit
+      // draw video “cover”
       ctx.drawImage(
         v,
-        0, 0, vw, vh,  // source dimensions
-        facingMode === 'user' ? cw - offsetX - scaledWidth : offsetX, // x position (account for mirroring)
-        offsetY,        // y position
-        scaledWidth,    // width
-        scaledHeight    // height
+        0, 0, vw, vh,
+        offsetX, offsetY,
+        vw * scale,
+        vh * scale
       );
 
       // pose estimation
@@ -125,10 +119,8 @@ export default function FullscreenPostureAnalyzer() {
           setPosture(`${cat} | ${avg.toFixed(1)}°`);
 
           const mapped = poses[0].keypoints.map(p => ({
-            x: (facingMode === 'user' 
-              ? cw - (p.x * scale) - offsetX // Account for mirroring
-              : (p.x * scale) + offsetX),
-            y: (p.y * scale) + offsetY,
+            x: p.x * scale + offsetX,
+            y: p.y * scale + offsetY,
             name: p.name,
             score: p.score
           }));
@@ -200,10 +192,10 @@ export default function FullscreenPostureAnalyzer() {
         style={{
           position: 'absolute',
           top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain'
+          left: '50%',
+          transform: 'translateX(-50%)',
+          height: '100vh',
+          width: 'auto'
         }}
       />
 
