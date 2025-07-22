@@ -12,21 +12,27 @@ const PostureAnalyzer = () => {
   const smoothingBuffer = useRef([]);
   const [posture, setPosture] = useState('Detecting...');
   const [devices, setDevices] = useState([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const init = async () => {
       await tf.setBackend('webgl');
-      const detectorConfig = {
-        modelType: posedetection.movenet.modelType.LIGHTNING,
-      };
-      detectorRef.current = await posedetection.createDetector(
-        posedetection.SupportedModels.MoveNet,
-        detectorConfig
-      );
-
-      await listCameras();
+      try {
+        const detectorConfig = {
+          modelType: posedetection.movenet.modelType.LIGHTNING,
+        };
+        detectorRef.current = await posedetection.createDetector(
+          posedetection.SupportedModels.MoveNet,
+          detectorConfig
+        );
+        await listCameras();
+      } catch (err) {
+        console.error('Detector init error:', err);
+        setError('Pose detector failed to initialize.');
+      }
     };
+
     init();
 
     return () => {
@@ -37,11 +43,16 @@ const PostureAnalyzer = () => {
   }, []);
 
   const listCameras = async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(d => d.kind === 'videoinput');
-    setDevices(videoDevices);
-    const preferred = videoDevices.find(d => d.label.toLowerCase().includes('back')) || videoDevices[0];
-    setSelectedDeviceId(preferred?.deviceId || null);
+    try {
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
+      setDevices(videoDevices);
+      const defaultDevice = videoDevices.find(d => d.label.toLowerCase().includes('back')) || videoDevices[0];
+      if (defaultDevice) setSelectedDeviceId(defaultDevice.deviceId);
+    } catch (err) {
+      console.error('Camera listing error:', err);
+      setError('Unable to list camera devices.');
+    }
   };
 
   useEffect(() => {
@@ -67,16 +78,36 @@ const PostureAnalyzer = () => {
         },
         audio: false,
       });
+
       video.srcObject = stream;
-      return new Promise(resolve => {
+      await new Promise(resolve => {
         video.onloadedmetadata = () => {
           video.play();
           resolve();
         };
       });
     } catch (err) {
-      console.error('Camera setup error:', err);
-      alert('Unable to access camera. Please allow permissions or try a different device.');
+      console.warn('Specific device access failed, falling back to facingMode:', err);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+          audio: false,
+        });
+        video.srcObject = stream;
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
+      } catch (fallbackErr) {
+        console.error('Camera fallback error:', fallbackErr);
+        setError('Camera access failed. Please allow permissions and refresh.');
+      }
     }
   };
 
@@ -113,15 +144,14 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
-  const normalizeKeypoint = (point, videoWidth, videoHeight, canvasWidth, canvasHeight) => ({
-    x: (point.x / videoWidth) * canvasWidth,
-    y: (point.y / videoHeight) * canvasHeight
+  const normalizeKeypoint = (point, vw, vh, cw, ch) => ({
+    x: (point.x / vw) * cw,
+    y: (point.y / vh) * ch
   });
 
   const getKeypoint = (keypoints, primary, fallback) => {
-    const primaryPoint = keypoints.find(kp => kp.name === primary && kp.score > 0.6);
-    if (primaryPoint) return primaryPoint;
-    return keypoints.find(kp => kp.name === fallback && kp.score > 0.6);
+    const p = keypoints.find(k => k.name === primary && k.score > 0.6);
+    return p || keypoints.find(k => k.name === fallback && k.score > 0.6);
   };
 
   const calculateBackAngle = (keypoints) => {
@@ -134,17 +164,16 @@ const PostureAnalyzer = () => {
     const cw = canvasRef.current.width;
     const ch = canvasRef.current.height;
 
-    const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
-    const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
+    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
 
-    const dx = normalizedShoulder.x - normalizedHip.x;
-    const dy = normalizedShoulder.y - normalizedHip.y;
+    const dx = ns.x - nh.x;
+    const dy = ns.y - nh.y;
+    const magnitude = Math.sqrt(dx * dx + dy * dy);
+    if (magnitude === 0) return null;
 
-    const backMagnitude = Math.sqrt(dx * dx + dy * dy);
-    if (backMagnitude === 0) return null;
-
-    const dotProduct = dy * -1;
-    const angleRad = Math.acos(dotProduct / backMagnitude);
+    const dot = dy * -1;
+    const angleRad = Math.acos(dot / magnitude);
     return angleRad * (180 / Math.PI);
   };
 
@@ -164,12 +193,12 @@ const PostureAnalyzer = () => {
     const cw = canvasRef.current.width;
     const ch = canvasRef.current.height;
 
-    const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
-    const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
+    const ns = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const nh = normalizeKeypoint(hip, vw, vh, cw, ch);
 
     ctx.beginPath();
-    ctx.moveTo(normalizedShoulder.x, normalizedShoulder.y);
-    ctx.lineTo(normalizedHip.x, normalizedHip.y);
+    ctx.moveTo(ns.x, ns.y);
+    ctx.lineTo(nh.x, nh.y);
     ctx.strokeStyle = 'aqua';
     ctx.lineWidth = 4;
     ctx.stroke();
@@ -178,7 +207,7 @@ const PostureAnalyzer = () => {
     ctx.font = '16px Arial';
     ctx.fillText(`Posture: ${postureLabel} | Angle: ${angle.toFixed(1)}°`, 10, 30);
 
-    drawArrow(ctx, normalizedHip, normalizedShoulder, "red");
+    drawArrow(ctx, nh, ns, 'red');
   };
 
   const drawArrow = (ctx, from, to, color) => {
@@ -205,14 +234,22 @@ const PostureAnalyzer = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h2>Current Posture: {posture}</h2>
+    <div style={{ textAlign: 'center', padding: '10px' }}>
+      <h2 style={{ fontSize: '1.2rem' }}>Current Posture: {posture}</h2>
 
-      <label>Select Camera:</label>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <label htmlFor="camera-select">Select Camera:</label>
       <select
+        id="camera-select"
         onChange={(e) => setSelectedDeviceId(e.target.value)}
-        value={selectedDeviceId || ''}
-        style={{ margin: '10px', padding: '5px' }}
+        value={selectedDeviceId}
+        style={{
+          margin: '10px',
+          padding: '8px',
+          fontSize: '1rem',
+          maxWidth: '90%',
+        }}
       >
         {devices.map((device, i) => (
           <option key={device.deviceId} value={device.deviceId}>
@@ -224,12 +261,12 @@ const PostureAnalyzer = () => {
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <video
           ref={videoRef}
-          width="640"
-          height="480"
           autoPlay
           playsInline
           muted
-          style={{ position: 'absolute', top: 0, left: 0, zIndex: 1, opacity: 0 }}
+          style={{ position: 'absolute', top: 0, left: 0, opacity: 0, zIndex: 1 }}
+          width="640"
+          height="480"
         />
         <canvas
           ref={canvasRef}
