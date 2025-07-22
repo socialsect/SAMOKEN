@@ -10,9 +10,9 @@ const PostureAnalyzer = () => {
   const canvasRef = useRef(null);
   const detectorRef = useRef(null);
   const smoothingBuffer = useRef([]);
+
   const [posture, setPosture] = useState('Detecting...');
-  const [devices, setDevices] = useState([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState('');
+  const [facingMode, setFacingMode] = useState('environment'); // 'user' or 'environment'
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -26,7 +26,8 @@ const PostureAnalyzer = () => {
           posedetection.SupportedModels.MoveNet,
           detectorConfig
         );
-        await listCameras();
+        await setupCamera();
+        detectPose();
       } catch (err) {
         console.error('Detector init error:', err);
         setError('Pose detector failed to initialize.');
@@ -42,37 +43,21 @@ const PostureAnalyzer = () => {
     };
   }, []);
 
-  const listCameras = async () => {
-    try {
-      const allDevices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
-      setDevices(videoDevices);
-      const defaultDevice = videoDevices.find(d => d.label.toLowerCase().includes('back')) || videoDevices[0];
-      if (defaultDevice) setSelectedDeviceId(defaultDevice.deviceId);
-    } catch (err) {
-      console.error('Camera listing error:', err);
-      setError('Unable to list camera devices.');
-    }
-  };
-
   useEffect(() => {
-    if (selectedDeviceId) {
-      setupCamera(selectedDeviceId).then(() => {
-        detectPose();
-      });
-    }
-  }, [selectedDeviceId]);
+    setupCamera();
+  }, [facingMode]);
 
-  const setupCamera = async (deviceId) => {
+  const setupCamera = async () => {
     if (videoRef.current?.srcObject) {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
     }
 
     const video = videoRef.current;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          deviceId: { exact: deviceId },
+          facingMode: { ideal: facingMode },
           width: { ideal: 640 },
           height: { ideal: 480 },
         },
@@ -80,6 +65,7 @@ const PostureAnalyzer = () => {
       });
 
       video.srcObject = stream;
+
       await new Promise(resolve => {
         video.onloadedmetadata = () => {
           video.play();
@@ -87,27 +73,8 @@ const PostureAnalyzer = () => {
         };
       });
     } catch (err) {
-      console.warn('Specific device access failed, falling back to facingMode:', err);
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-          },
-          audio: false,
-        });
-        video.srcObject = stream;
-        await new Promise(resolve => {
-          video.onloadedmetadata = () => {
-            video.play();
-            resolve();
-          };
-        });
-      } catch (fallbackErr) {
-        console.error('Camera fallback error:', fallbackErr);
-        setError('Camera access failed. Please allow permissions and refresh.');
-      }
+      console.error('Camera access error:', err);
+      setError('Camera access failed. Please allow permissions and refresh.');
     }
   };
 
@@ -131,7 +98,9 @@ const PostureAnalyzer = () => {
             smoothingBuffer.current.shift();
           }
 
-          const smoothedAngle = smoothingBuffer.current.reduce((a, b) => a + b, 0) / smoothingBuffer.current.length;
+          const smoothedAngle =
+            smoothingBuffer.current.reduce((a, b) => a + b, 0) /
+            smoothingBuffer.current.length;
           const postureCategory = categorizePosture(smoothedAngle);
           setPosture(postureCategory);
           drawVisualization(ctx, keypoints, postureCategory, smoothedAngle);
@@ -146,7 +115,7 @@ const PostureAnalyzer = () => {
 
   const normalizeKeypoint = (point, vw, vh, cw, ch) => ({
     x: (point.x / vw) * cw,
-    y: (point.y / vh) * ch
+    y: (point.y / vh) * ch,
   });
 
   const getKeypoint = (keypoints, primary, fallback) => {
@@ -227,8 +196,14 @@ const PostureAnalyzer = () => {
 
     ctx.beginPath();
     ctx.moveTo(to.x, to.y);
-    ctx.lineTo(to.x - headlen * Math.cos(angle - Math.PI / 6), to.y - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(to.x - headlen * Math.cos(angle + Math.PI / 6), to.y - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.lineTo(
+      to.x - headlen * Math.cos(angle - Math.PI / 6),
+      to.y - headlen * Math.sin(angle - Math.PI / 6)
+    );
+    ctx.lineTo(
+      to.x - headlen * Math.cos(angle + Math.PI / 6),
+      to.y - headlen * Math.sin(angle + Math.PI / 6)
+    );
     ctx.lineTo(to.x, to.y);
     ctx.fill();
   };
@@ -239,11 +214,11 @@ const PostureAnalyzer = () => {
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <label htmlFor="camera-select">Select Camera:</label>
+      <label htmlFor="facing-select">Camera:</label>
       <select
-        id="camera-select"
-        onChange={(e) => setSelectedDeviceId(e.target.value)}
-        value={selectedDeviceId}
+        id="facing-select"
+        onChange={(e) => setFacingMode(e.target.value)}
+        value={facingMode}
         style={{
           margin: '10px',
           padding: '8px',
@@ -251,11 +226,8 @@ const PostureAnalyzer = () => {
           maxWidth: '90%',
         }}
       >
-        {devices.map((device, i) => (
-          <option key={device.deviceId} value={device.deviceId}>
-            {device.label || `Camera ${i + 1}`}
-          </option>
-        ))}
+        <option value="environment">📷 Back Camera</option>
+        <option value="user">🤳 Front Camera</option>
       </select>
 
       <div style={{ position: 'relative', display: 'inline-block' }}>
