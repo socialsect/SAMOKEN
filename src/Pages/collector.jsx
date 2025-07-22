@@ -232,12 +232,15 @@ const PostureAnalyzer = () => {
   width="640"
   height="480"
   style={{
-    position: 'relative',
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
     height: '100%',
     zIndex: 2,
   }}
 />
+
       </div>
     </div>
   );
