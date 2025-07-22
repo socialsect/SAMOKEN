@@ -57,8 +57,8 @@ const PostureAnalyzer = () => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { exact: facingMode },
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          width: { ideal: window.innerWidth },
+          height: { ideal: window.innerHeight },
         },
         audio: false,
       });
@@ -210,21 +210,34 @@ const PostureAnalyzer = () => {
       </select>
 
       <div style={{ position: 'relative', display: 'inline-block' }}>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          style={{ position: 'absolute', top: 0, left: 0, opacity: 0, zIndex: 1 }}
-          width="640"
-          height="480"
-        />
-        <canvas
-          ref={canvasRef}
-          width="640"
-          height="480"
-          style={{ zIndex: 2 }}
-        />
+      <video
+  ref={videoRef}
+  autoPlay
+  playsInline
+  muted
+  style={{
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+    zIndex: 1,
+  }}
+/>
+
+<canvas
+  ref={canvasRef}
+  width="640"
+  height="480"
+  style={{
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    zIndex: 2,
+  }}
+/>
       </div>
     </div>
   );
