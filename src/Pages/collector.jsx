@@ -145,7 +145,7 @@ const PostureAnalyzer = () => {
     ctx.beginPath();
     ctx.moveTo(shoulder.x, shoulder.y);
     ctx.lineTo(hip.x, hip.y);
-    ctx.strokeStyle = 'aqua';
+    ctx.strokeStyle = '#CB0000';
     ctx.lineWidth = 4;
     ctx.stroke();
 
