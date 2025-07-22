@@ -11,7 +11,6 @@ const PostureAnalyzer = () => {
   const detectorRef = useRef(null);
   const smoothingBuffer = useRef([]);
   const [posture, setPosture] = useState('Detecting...');
-  const [calibrationAngle, setCalibrationAngle] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -65,22 +64,18 @@ const PostureAnalyzer = () => {
         const angle = calculateBackAngle(keypoints);
 
         if (angle !== null) {
-          console.log('Raw Angle:', angle.toFixed(2));
-
           smoothingBuffer.current.push(angle);
           if (smoothingBuffer.current.length > SMOOTHING_BUFFER_SIZE) {
             smoothingBuffer.current.shift();
           }
 
           const smoothedAngle = smoothingBuffer.current.reduce((a, b) => a + b, 0) / smoothingBuffer.current.length;
-          const adjustedAngle = calibrationAngle !== null ? Math.abs(smoothedAngle - calibrationAngle) : smoothedAngle;
+          console.log('Smoothed Back Angle to Vertical:', smoothedAngle.toFixed(2));
 
-          console.log('Adjusted Angle:', adjustedAngle.toFixed(2));
-
-          const postureCategory = categorizePosture(adjustedAngle);
+          const postureCategory = categorizePosture(smoothedAngle);
           setPosture(postureCategory);
 
-          drawVisualization(ctx, keypoints, postureCategory);
+          drawVisualization(ctx, keypoints, postureCategory, smoothedAngle);
         }
       }
 
@@ -90,18 +85,20 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
-  /** Normalize Keypoints */
+  /** Helper to normalize keypoints */
   const normalizeKeypoint = (point, videoWidth, videoHeight, canvasWidth, canvasHeight) => ({
     x: (point.x / videoWidth) * canvasWidth,
     y: (point.y / videoHeight) * canvasHeight
   });
 
+  /** Fallback confidence check */
   const getKeypoint = (keypoints, primary, fallback) => {
     const primaryPoint = keypoints.find(kp => kp.name === primary && kp.score > 0.6);
     if (primaryPoint) return primaryPoint;
     return keypoints.find(kp => kp.name === fallback && kp.score > 0.6);
   };
 
+  /** Dot Product based angle to vertical */
   const calculateBackAngle = (keypoints) => {
     const shoulder = getKeypoint(keypoints, 'left_shoulder', 'right_shoulder');
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
@@ -118,66 +115,85 @@ const PostureAnalyzer = () => {
 
     const dx = normalizedShoulder.x - normalizedHip.x;
     const dy = normalizedShoulder.y - normalizedHip.y;
-    const radians = Math.atan2(dx, dy);
-    const angleDeg = Math.abs(radians * (180 / Math.PI));
 
-    console.log('Normalized Shoulder:', normalizedShoulder, 'Hip:', normalizedHip);
+    const backMagnitude = Math.sqrt(dx * dx + dy * dy);
+    if (backMagnitude === 0) return null; // Prevent division by zero
+
+    // Vertical vector is (0, -1)
+    const dotProduct = (dx * 0) + (dy * -1);
+    const angleRad = Math.acos(dotProduct / backMagnitude);
+    const angleDeg = angleRad * (180 / Math.PI);
+
+    console.log('Back Vector Angle to Vertical:', angleDeg.toFixed(2));
     return angleDeg;
   };
 
-  /** Adjusted Thresholds based on golf posture patterns */
+  /** Adjusted thresholds */
   const categorizePosture = (angle) => {
-    if (angle <= 25) return 'Upright';
-    if (angle <= 55) return 'Normal';
+    if (angle <= 10) return 'Upright';
+    if (angle <= 25) return 'Normal';
     return 'Crouched';
   };
 
-  const drawVisualization = (ctx, keypoints, postureLabel) => {
+  /** Draw posture line + vector arrow */
+  const drawVisualization = (ctx, keypoints, postureLabel, angle) => {
     const shoulder = getKeypoint(keypoints, 'left_shoulder', 'right_shoulder');
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
 
-    if (shoulder && hip) {
-      const vw = videoRef.current.videoWidth || 640;
-      const vh = videoRef.current.videoHeight || 480;
-      const cw = canvasRef.current.width;
-      const ch = canvasRef.current.height;
+    if (!shoulder || !hip) return;
 
-      const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
-      const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
+    const vw = videoRef.current.videoWidth || 640;
+    const vh = videoRef.current.videoHeight || 480;
+    const cw = canvasRef.current.width;
+    const ch = canvasRef.current.height;
 
-      ctx.beginPath();
-      ctx.moveTo(normalizedShoulder.x, normalizedShoulder.y);
-      ctx.lineTo(normalizedHip.x, normalizedHip.y);
+    const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
 
-      const color = {
-        'Upright': 'green',
-        'Normal': 'orange',
-        'Crouched': 'red'
-      }[postureLabel];
+    // Draw back line
+    ctx.beginPath();
+    ctx.moveTo(normalizedShoulder.x, normalizedShoulder.y);
+    ctx.lineTo(normalizedHip.x, normalizedHip.y);
+    ctx.strokeStyle = 'aqua';
+    ctx.lineWidth = 4;
+    ctx.stroke();
 
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 4;
-      ctx.stroke();
+    // Draw posture label
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.fillText(`Posture: ${postureLabel} | Angle: ${angle.toFixed(1)}°`, 10, 30);
 
-      ctx.fillStyle = color;
-      ctx.font = '18px Arial';
-      ctx.fillText(`Posture: ${postureLabel}`, 10, 30);
-    }
+    // Draw vector arrow
+    drawArrow(ctx, normalizedHip, normalizedShoulder, 'lime');
   };
 
-  /** Calibrate Current Angle as Upright */
-  const handleCalibrate = () => {
-    if (smoothingBuffer.current.length > 0) {
-      const latestAngle = smoothingBuffer.current[smoothingBuffer.current.length - 1];
-      setCalibrationAngle(latestAngle);
-      alert(`Calibrated at ${latestAngle.toFixed(2)}° as Upright`);
-    }
+  /** Utility to draw an arrow between two points */
+  const drawArrow = (ctx, from, to, color) => {
+    const headlen = 10;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const angle = Math.atan2(dy, dx);
+
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(to.x - headlen * Math.cos(angle - Math.PI / 6), to.y - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(to.x - headlen * Math.cos(angle + Math.PI / 6), to.y - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.lineTo(to.x, to.y);
+    ctx.fill();
   };
 
   return (
     <div>
       <h2>Current Posture: {posture}</h2>
-      <button onClick={handleCalibrate}>Calibrate Upright</button>
       <video ref={videoRef} width="640" height="480" style={{ display: 'none' }} />
       <canvas ref={canvasRef} width="640" height="480" />
     </div>
