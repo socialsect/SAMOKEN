@@ -34,7 +34,13 @@ const PostureAnalyzer = () => {
 
   const setupCamera = async () => {
     const video = videoRef.current;
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      }
+    });
     video.srcObject = stream;
     return new Promise(resolve => {
       video.onloadedmetadata = () => {
@@ -59,6 +65,7 @@ const PostureAnalyzer = () => {
         const angle = calculateBackAngle(keypoints);
 
         if (angle !== null) {
+          console.log('Detected Back Angle:', angle.toFixed(2));
           smoothingBuffer.current.push(angle);
           if (smoothingBuffer.current.length > SMOOTHING_BUFFER_SIZE) {
             smoothingBuffer.current.shift();
@@ -78,15 +85,30 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
-  /** SIDE VIEW ANGLE CALCULATION **/
+  /** Normalizing Keypoints for canvas **/
+  const normalizeKeypoint = (point, videoWidth, videoHeight, canvasWidth, canvasHeight) => ({
+    x: (point.x / videoWidth) * canvasWidth,
+    y: (point.y / videoHeight) * canvasHeight
+  });
+
+  /** Fallback to right side if left side confidence is low **/
+  const getKeypoint = (keypoints, primary, fallback) => {
+    const first = keypoints.find(kp => kp.name === primary && kp.score > 0.6);
+    if (first) return first;
+    return keypoints.find(kp => kp.name === fallback && kp.score > 0.6);
+  };
+
   const calculateBackAngle = (keypoints) => {
-    const leftShoulder = keypoints.find(kp => kp.name === 'left_shoulder' && kp.score > 0.6);
-    const leftHip = keypoints.find(kp => kp.name === 'left_hip' && kp.score > 0.6);
+    const shoulder = getKeypoint(keypoints, 'left_shoulder', 'right_shoulder');
+    const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
 
-    if (!leftShoulder || !leftHip) return null;
+    if (!shoulder || !hip) return null;
 
-    const dx = leftShoulder.x - leftHip.x;
-    const dy = leftShoulder.y - leftHip.y;
+    const normalizedShoulder = normalizeKeypoint(shoulder, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+    const normalizedHip = normalizeKeypoint(hip, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+
+    const dx = normalizedShoulder.x - normalizedHip.x;
+    const dy = normalizedShoulder.y - normalizedHip.y;
     const radians = Math.atan2(dx, dy);
     const angleDeg = Math.abs(radians * (180 / Math.PI));
 
@@ -94,19 +116,22 @@ const PostureAnalyzer = () => {
   };
 
   const categorizePosture = (angle) => {
-    if (angle <= 15) return 'Upright';
-    if (angle <= 30) return 'Normal';
+    if (angle <= 20) return 'Upright';       // Adjusted threshold
+    if (angle <= 35) return 'Normal';        // Adjusted threshold
     return 'Crouched';
   };
 
   const drawVisualization = (ctx, keypoints, postureLabel) => {
-    const leftShoulder = keypoints.find(kp => kp.name === 'left_shoulder');
-    const leftHip = keypoints.find(kp => kp.name === 'left_hip');
+    const shoulder = getKeypoint(keypoints, 'left_shoulder', 'right_shoulder');
+    const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
 
-    if (leftShoulder && leftHip) {
+    if (shoulder && hip) {
+      const normalizedShoulder = normalizeKeypoint(shoulder, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+      const normalizedHip = normalizeKeypoint(hip, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+
       ctx.beginPath();
-      ctx.moveTo(leftShoulder.x, leftShoulder.y);
-      ctx.lineTo(leftHip.x, leftHip.y);
+      ctx.moveTo(normalizedShoulder.x, normalizedShoulder.y);
+      ctx.lineTo(normalizedHip.x, normalizedHip.y);
 
       const color = {
         'Upright': 'green',
@@ -125,8 +150,9 @@ const PostureAnalyzer = () => {
 
     keypoints.forEach(point => {
       if (point.score > 0.6) {
+        const normalized = normalizeKeypoint(point, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+        ctx.arc(normalized.x, normalized.y, 5, 0, 2 * Math.PI);
         ctx.fillStyle = 'aqua';
         ctx.fill();
       }
