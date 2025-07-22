@@ -40,3 +40,15 @@
 .pad-but-training{
     margin-top: 20px;
 }
+
+@media (min-width: 1024px) {
+  .training-container {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

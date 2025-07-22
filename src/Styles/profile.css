@@ -317,4 +317,16 @@
 .profile-img-close:hover {
   background: #e53935;
 }
+
+@media (min-width: 1024px) {
+  .profile-page-container {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
   
