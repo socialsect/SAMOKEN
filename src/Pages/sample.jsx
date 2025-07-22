@@ -219,6 +219,25 @@ const SAMPLE = () => {
           {loading ? 'Loading…' : posture}
         </div>
       </div>
+{/* posture color legend */}
+<div style={{
+  position: 'absolute',
+  bottom: 20,
+  right: 20,
+  background: 'rgba(0,0,0,0.5)',
+  padding: '8px 12px',
+  borderRadius: '8px',
+  color: '#fff',
+  fontSize: '0.9rem',
+  fontFamily: 'Arial, sans-serif',
+  lineHeight: '1.4',
+  pointerEvents: 'none',
+  zIndex: 2
+}}>
+  <div><span style={{ color: 'lime', fontWeight: 'bold' }}>●</span> Upright</div>
+  <div><span style={{ color: 'orange', fontWeight: 'bold' }}>●</span> Normal</div>
+  <div><span style={{ color: 'red', fontWeight: 'bold' }}>●</span> Crouched</div>
+</div>
 
       {/* error banner */}
       {error && (
