@@ -178,7 +178,7 @@ const PostureAnalyzer = () => {
     ctx.font = '16px Arial';
     ctx.fillText(`Posture: ${postureLabel} | Angle: ${angle.toFixed(1)}°`, 10, 30);
 
-    drawArrow(ctx, normalizedHip, normalizedShoulder, "CB0000");
+    drawArrow(ctx, normalizedHip, normalizedShoulder, "red");
   };
 
   const drawArrow = (ctx, from, to, color) => {
@@ -225,7 +225,7 @@ const PostureAnalyzer = () => {
         <video
           ref={videoRef}
           width="640"
-          height="600"
+          height="480"
           autoPlay
           playsInline
           muted
@@ -234,7 +234,7 @@ const PostureAnalyzer = () => {
         <canvas
           ref={canvasRef}
           width="640"
-          height="600"
+          height="480"
           style={{ zIndex: 2 }}
         />
       </div>
