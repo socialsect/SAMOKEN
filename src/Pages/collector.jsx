@@ -11,6 +11,7 @@ const PostureAnalyzer = () => {
   const detectorRef = useRef(null);
   const smoothingBuffer = useRef([]);
   const [posture, setPosture] = useState('Detecting...');
+  const [calibrationAngle, setCalibrationAngle] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -22,7 +23,6 @@ const PostureAnalyzer = () => {
       await setupCamera();
       detectPose();
     };
-
     init();
 
     return () => {
@@ -65,14 +65,19 @@ const PostureAnalyzer = () => {
         const angle = calculateBackAngle(keypoints);
 
         if (angle !== null) {
-          console.log('Detected Back Angle:', angle.toFixed(2));
+          console.log('Raw Angle:', angle.toFixed(2));
+
           smoothingBuffer.current.push(angle);
           if (smoothingBuffer.current.length > SMOOTHING_BUFFER_SIZE) {
             smoothingBuffer.current.shift();
           }
 
           const smoothedAngle = smoothingBuffer.current.reduce((a, b) => a + b, 0) / smoothingBuffer.current.length;
-          const postureCategory = categorizePosture(smoothedAngle);
+          const adjustedAngle = calibrationAngle !== null ? Math.abs(smoothedAngle - calibrationAngle) : smoothedAngle;
+
+          console.log('Adjusted Angle:', adjustedAngle.toFixed(2));
+
+          const postureCategory = categorizePosture(adjustedAngle);
           setPosture(postureCategory);
 
           drawVisualization(ctx, keypoints, postureCategory);
@@ -85,16 +90,15 @@ const PostureAnalyzer = () => {
     processFrame();
   };
 
-  /** Normalizing Keypoints for canvas **/
+  /** Normalize Keypoints */
   const normalizeKeypoint = (point, videoWidth, videoHeight, canvasWidth, canvasHeight) => ({
     x: (point.x / videoWidth) * canvasWidth,
     y: (point.y / videoHeight) * canvasHeight
   });
 
-  /** Fallback to right side if left side confidence is low **/
   const getKeypoint = (keypoints, primary, fallback) => {
-    const first = keypoints.find(kp => kp.name === primary && kp.score > 0.6);
-    if (first) return first;
+    const primaryPoint = keypoints.find(kp => kp.name === primary && kp.score > 0.6);
+    if (primaryPoint) return primaryPoint;
     return keypoints.find(kp => kp.name === fallback && kp.score > 0.6);
   };
 
@@ -104,20 +108,27 @@ const PostureAnalyzer = () => {
 
     if (!shoulder || !hip) return null;
 
-    const normalizedShoulder = normalizeKeypoint(shoulder, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
-    const normalizedHip = normalizeKeypoint(hip, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+    const vw = videoRef.current.videoWidth || 640;
+    const vh = videoRef.current.videoHeight || 480;
+    const cw = canvasRef.current.width;
+    const ch = canvasRef.current.height;
+
+    const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+    const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
 
     const dx = normalizedShoulder.x - normalizedHip.x;
     const dy = normalizedShoulder.y - normalizedHip.y;
     const radians = Math.atan2(dx, dy);
     const angleDeg = Math.abs(radians * (180 / Math.PI));
 
+    console.log('Normalized Shoulder:', normalizedShoulder, 'Hip:', normalizedHip);
     return angleDeg;
   };
 
+  /** Adjusted Thresholds based on golf posture patterns */
   const categorizePosture = (angle) => {
-    if (angle <= 20) return 'Upright';       // Adjusted threshold
-    if (angle <= 35) return 'Normal';        // Adjusted threshold
+    if (angle <= 25) return 'Upright';
+    if (angle <= 55) return 'Normal';
     return 'Crouched';
   };
 
@@ -126,8 +137,13 @@ const PostureAnalyzer = () => {
     const hip = getKeypoint(keypoints, 'left_hip', 'right_hip');
 
     if (shoulder && hip) {
-      const normalizedShoulder = normalizeKeypoint(shoulder, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
-      const normalizedHip = normalizeKeypoint(hip, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
+      const vw = videoRef.current.videoWidth || 640;
+      const vh = videoRef.current.videoHeight || 480;
+      const cw = canvasRef.current.width;
+      const ch = canvasRef.current.height;
+
+      const normalizedShoulder = normalizeKeypoint(shoulder, vw, vh, cw, ch);
+      const normalizedHip = normalizeKeypoint(hip, vw, vh, cw, ch);
 
       ctx.beginPath();
       ctx.moveTo(normalizedShoulder.x, normalizedShoulder.y);
@@ -147,21 +163,21 @@ const PostureAnalyzer = () => {
       ctx.font = '18px Arial';
       ctx.fillText(`Posture: ${postureLabel}`, 10, 30);
     }
+  };
 
-    keypoints.forEach(point => {
-      if (point.score > 0.6) {
-        const normalized = normalizeKeypoint(point, videoRef.current.videoWidth, videoRef.current.videoHeight, canvasRef.current.width, canvasRef.current.height);
-        ctx.beginPath();
-        ctx.arc(normalized.x, normalized.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'aqua';
-        ctx.fill();
-      }
-    });
+  /** Calibrate Current Angle as Upright */
+  const handleCalibrate = () => {
+    if (smoothingBuffer.current.length > 0) {
+      const latestAngle = smoothingBuffer.current[smoothingBuffer.current.length - 1];
+      setCalibrationAngle(latestAngle);
+      alert(`Calibrated at ${latestAngle.toFixed(2)}° as Upright`);
+    }
   };
 
   return (
     <div>
       <h2>Current Posture: {posture}</h2>
+      <button onClick={handleCalibrate}>Calibrate Upright</button>
       <video ref={videoRef} width="640" height="480" style={{ display: 'none' }} />
       <canvas ref={canvasRef} width="640" height="480" />
     </div>
