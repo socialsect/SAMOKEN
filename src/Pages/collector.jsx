@@ -12,7 +12,7 @@ const PostureAnalyzer = () => {
   const smoothingBuffer = useRef([]);
 
   const [posture, setPosture] = useState('Detecting...');
-  const [facingMode, setFacingMode] = useState('environment');
+  const [facingMode, setFacingMode] = useState('user');
   const [error, setError] = useState('');
 
   useEffect(() => {
