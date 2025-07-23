@@ -3,20 +3,18 @@ import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
 
-const EMA_ALPHA = 0.2;
+const SMOOTHING_BUFFER_SIZE = 5;
 
 export default function FullscreenPostureAnalyzer() {
-  const videoRef      = useRef(null);
-  const canvasRef     = useRef(null);
-  const detectorRef   = useRef(null);
-  const smoothedAngle = useRef(null);
+  const videoRef    = useRef(null);
+  const canvasRef   = useRef(null);
+  const detectorRef = useRef(null);
 
   const [posture,    setPosture]    = useState('Detecting…');
   const [facingMode, setFacingMode] = useState('user');
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
 
-  // Initialize MoveNet once
   useEffect(() => {
     (async () => {
       try {
@@ -35,7 +33,6 @@ export default function FullscreenPostureAnalyzer() {
     return stopCamera;
   }, []);
 
-  // Restart on camera flip
   useEffect(() => {
     if (detectorRef.current) startCamera();
   }, [facingMode]);
@@ -47,7 +44,7 @@ export default function FullscreenPostureAnalyzer() {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: facingMode },
-          width: 640,
+          width:  640,
           height: 480
         },
         audio: false
@@ -69,205 +66,185 @@ export default function FullscreenPostureAnalyzer() {
   function stopCamera() {
     videoRef.current?.srcObject
       ?.getTracks()
-      ?.forEach(t => t.stop());
+      .forEach(t => t.stop());
   }
 
   function resizeCanvas() {
     const v = videoRef.current, c = canvasRef.current;
     if (!v || !c) return;
-    c.width = v.videoWidth;
+    c.width  = v.videoWidth;
     c.height = v.videoHeight;
   }
 
   function detectLoop() {
-    const v = videoRef.current;
-    const c = canvasRef.current;
-    const ctx = c.getContext('2d');
-    const flip = facingMode === 'user';
-    
+    const v = videoRef.current, c = canvasRef.current, ctx = c.getContext('2d');
+    const buf = [];
+
     async function frame() {
       if (!detectorRef.current || !v) return;
+
+      // cover-style math
       const vw = v.videoWidth, vh = v.videoHeight;
-      const cw = c.width, ch = c.height;
+      const cw = c.width,       ch = c.height;
       const scale   = Math.max(cw/vw, ch/vh);
-      const offsetX = (cw - vw*scale)/2;
-      const offsetY = (ch - vh*scale)/2;
+      const offsetX = (cw - vw*scale) / 2;
+      const offsetY = (ch - vh*scale) / 2;
 
+      // clear & mirror if front camera
       ctx.clearRect(0,0,cw,ch);
-
-      if (flip) {
-        // flip both video AND overlay
+      if (facingMode === 'user') {
         ctx.save();
         ctx.scale(-1,1);
         ctx.translate(-cw,0);
       }
 
-      // 1) draw video
+      // draw video “cover”
       ctx.drawImage(
         v,
-        0,0, vw, vh,
+        0, 0, vw, vh,
         offsetX, offsetY,
-        vw*scale, vh*scale
+        vw * scale,
+        vh * scale
       );
 
-      // 2) pose estimate
+      // pose estimation
       const poses = await detectorRef.current.estimatePoses(v);
       if (poses[0]) {
-        const raw = calculateBackAngleMid(poses[0].keypoints);
-        if (raw != null) {
-          // EMA smoothing
-          const prev = smoothedAngle.current ?? raw;
-          const next = prev*(1-EMA_ALPHA) + raw*EMA_ALPHA;
-          smoothedAngle.current = next;
+        const angle = calculateBackAngle(poses[0].keypoints);
+        if (angle != null) {
+          buf.push(angle);
+          if (buf.length > SMOOTHING_BUFFER_SIZE) buf.shift();
+          const avg = buf.reduce((a,b)=>a+b,0)/buf.length;
+          const cat = categorizePosture(avg);
+          setPosture(`${cat} | ${avg.toFixed(1)}°`);
 
-          const cat = categorize(next);
-          setPosture(`${cat} | ${next.toFixed(1)}°`);
-
-          // map & draw spine+arc inside the same flip
           const mapped = poses[0].keypoints.map(p => ({
-            x: p.x*scale + offsetX,
-            y: p.y*scale + offsetY,
+            x: p.x * scale + offsetX,
+            y: p.y * scale + offsetY,
             name: p.name,
             score: p.score
           }));
-          drawSpinePlusArc(ctx, mapped, next);
+          drawOverlay(ctx, mapped, cat);
         }
       }
 
-      if (flip) ctx.restore();
-
+      if (facingMode === 'user') ctx.restore();
       requestAnimationFrame(frame);
     }
+
     frame();
   }
 
-  // — helpers —
-
-  function getKey(kps, a, b) {
-    return kps.find(x=>x.name===a&&x.score>0.6)
-        || kps.find(x=>x.name===b&&x.score>0.6)
-        || null;
-  }
-
-  function calculateBackAngleMid(kps) {
-    const sh = ['left_shoulder','right_shoulder']
-      .map(n=>getKey(kps,n,n)).filter(Boolean);
-    const hi = ['left_hip','right_hip']
-      .map(n=>getKey(kps,n,n)).filter(Boolean);
-    if (!sh.length || !hi.length) return null;
-    const avg = pts => ({
-      x: pts.reduce((s,p)=>s+p.x,0)/pts.length,
-      y: pts.reduce((s,p)=>s+p.y,0)/pts.length
-    });
-    const ms = avg(sh), mh = avg(hi);
-    const dx = ms.x-mh.x, dy = ms.y-mh.y, mag = Math.hypot(dx,dy);
-    if (!mag) return null;
-    return Math.acos(-dy/mag)*(180/Math.PI);
-  }
-
-  function categorize(a) {
-    return a<=10 ? 'Upright' : a<=25 ? 'Normal' : 'Crouched';
-  }
-
-  /** Draw single spine line + interior angle arc **/
-  function drawSpinePlusArc(ctx, kps, angle) {
-    const hip = getKey(kps,'left_hip','right_hip');
-    const sh  = getKey(kps,'left_shoulder','right_shoulder');
-    if (!hip || !sh) return;
-
-    // spine line
-    ctx.strokeStyle='red';
-    ctx.lineWidth=4;
-    ctx.beginPath();
-      ctx.moveTo(hip.x,hip.y);
-      ctx.lineTo(sh.x,sh.y);
-    ctx.stroke();
-
-    // interior arc
-    const dx = sh.x - hip.x;
-    const dy = sh.y - hip.y;
-    const spineRad = Math.atan2(dy,dx);
-    const down    = Math.PI/2;
-    const r       = 40;
-    let diff = (spineRad-down+2*Math.PI)%(2*Math.PI);
-    const ccw = diff>Math.PI;
-    ctx.beginPath();
-      ctx.lineWidth=3;
-      ctx.strokeStyle='red';
-      ctx.arc(hip.x,hip.y,r,down,spineRad,ccw);
-    ctx.stroke();
-
-    // label
-    const bis = down + (ccw ? -(2*Math.PI-diff)/2 : diff/2);
-    ctx.fillStyle='red';
-    ctx.font='14px Arial';
-    ctx.fillText(
-      `${angle.toFixed(0)}°`,
-      hip.x + (r+6)*Math.cos(bis),
-      hip.y + (r+6)*Math.sin(bis)
+  function getKeypoint(kps, primary, fallback) {
+    return (
+      kps.find(p => p.name === primary && p.score > 0.6) ||
+      kps.find(p => p.name === fallback && p.score > 0.6) ||
+      null
     );
+  }
+
+  function calculateBackAngle(kps) {
+    const s = getKeypoint(kps,'left_shoulder','right_shoulder');
+    const h = getKeypoint(kps,'left_hip','right_hip');
+    if (!s || !h) return null;
+    const dx = s.x - h.x, dy = s.y - h.y;
+    const m = Math.hypot(dx,dy);
+    if (m === 0) return null;
+    const dot = -dy; // vs. (0,-1)
+    return Math.acos(dot/m)*(180/Math.PI);
+  }
+
+  function categorizePosture(angle) {
+    return angle <= 10   ? 'Upright'
+         : angle <= 25   ? 'Normal'
+                         : 'Crouched';
+  }
+
+  function drawOverlay(ctx, kps, label) {
+    const s = getKeypoint(kps,'left_shoulder','right_shoulder');
+    const h = getKeypoint(kps,'left_hip','right_hip');
+    if (!s || !h) return;
+    ctx.strokeStyle = label==='Upright' ? 'lime'
+                     : label==='Normal'  ? 'orange'
+                                         : 'red';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(h.x, h.y);
+    ctx.stroke();
   }
 
   return (
     <div style={{
-      position:'fixed',top:0,left:0,
-      width:'100vw',height:'100vh',
-      background:'#000',overflow:'hidden'
+      position: 'fixed',
+      top: 0, left: 0,
+      width: '100vw', height: '100vh',
+      background: '#000', overflow: 'hidden'
     }}>
       <video
         ref={videoRef}
-        style={{display:'none'}}
+        style={{ display: 'none' }}
         playsInline muted autoPlay
       />
+
       <canvas
         ref={canvasRef}
         style={{
-          position:'absolute',
-          top:0,left:'50%',
-          transform:'translateX(-50%)',
-          height:'100vh',
-          width:'auto'
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          height: '100vh',
+          width: 'auto'
         }}
       />
 
       {/* UI overlay */}
       <div style={{
-        position:'absolute',top:20,left:20,right:20,
-        display:'flex',justifyContent:'space-between',
-        alignItems:'center',pointerEvents:'none',zIndex:2
+        position: 'absolute',
+        top: 20, left: 20, right: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        pointerEvents: 'none',
+        zIndex: 2
       }}>
         <select
           value={facingMode}
-          onChange={e=>setFacingMode(e.target.value)}
+          onChange={e => setFacingMode(e.target.value)}
           style={{
-            pointerEvents:'auto',
-            padding:'6px 10px',
-            fontSize:'1rem',
-            borderRadius:'4px'
+            pointerEvents: 'auto',
+            padding: '6px 10px',
+            fontSize: '1rem',
+            borderRadius: '4px'
           }}
         >
           <option value="user">🤳 Front</option>
           <option value="environment">📷 Back</option>
         </select>
+
         <div style={{
-          pointerEvents:'none',
-          color:'#fff',
-          fontSize:'1.2rem',
-          background:'rgba(0,0,0,0.5)',
-          padding:'4px 8px',
-          borderRadius:'4px'
+          pointerEvents: 'none',
+          color: '#fff',
+          fontSize: '1.2rem',
+          background: 'rgba(0,0,0,0.5)',
+          padding: '4px 8px',
+          borderRadius: '4px'
         }}>
-          {loading? 'Loading…': posture}
+          {loading ? 'Loading…' : posture}
         </div>
       </div>
 
       {error && (
         <div style={{
-          position:'absolute',
-          bottom:20,left:20,right:20,
-          color:'red',textAlign:'center',
-          background:'rgba(0,0,0,0.6)',
-          padding:'6px 12px',borderRadius:'4px',zIndex:2
+          position: 'absolute',
+          bottom: 20, left: 20, right: 20,
+          color: 'red',
+          textAlign: 'center',
+          background: 'rgba(0,0,0,0.6)',
+          padding: '6px 12px',
+          borderRadius: '4px',
+          zIndex: 2
         }}>
           {error}
         </div>
