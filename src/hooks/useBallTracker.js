@@ -40,7 +40,11 @@ export default function useBallTracker(
 
           const resp = await fetch(BACKEND_URL, {
             method: 'POST',
-            body: form
+            body: form,
+            // Don't set Content-Type header - let the browser set it with the correct boundary
+            headers: {
+              'Accept': 'application/json'
+            }
           });
 
           if (!resp.ok) {
