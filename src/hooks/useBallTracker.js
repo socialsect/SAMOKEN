@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 // For testing with hardcoded backend URL
-const BACKEND_URL = 'https://runner-web-app-backend.onrender.com/analyze-frame';
+const BACKEND_URL = 'http://localhost:8000/analyze-frame';
 
 export default function useBallTracker(
   videoRef,
