@@ -1,113 +1,94 @@
-import { useEffect, useRef, useState } from 'react';
-import { getCenterContour, getAngle, cleanupMats } from '../utils/cvUtils';
+import { useEffect, useRef } from 'react';
 
-const useBallTracker = (videoRef, canvasRef, tracking, onComplete) => {
-  const [putts, setPutts] = useState([]);
-  const requestRef = useRef();
-  const hiddenRef = useRef(false);
-  const backSubRef = useRef(null);
+// For testing with hardcoded backend URL
+const BACKEND_URL = 'https://runner-web-app-backend.onrender.com/analyze-frame';
+
+export default function useBallTracker(
+  videoRef,
+  canvasRef,
+  running,
+  onBall,      // callback(x, y)
+  onComplete,  // callback({ avg, stddev, recommendation })
+  onDetect,    // callback() when ball is detected
+  intervalMs = 100
+) {
+  const timerRef = useRef();
 
   useEffect(() => {
-    document.addEventListener('visibilitychange', () => {
-      hiddenRef.current = document.hidden;
-    });
-    return () => {
-      document.removeEventListener('visibilitychange', () => {});
-      stopTracking();
-    };
-  }, []);
-
-  const stopTracking = () => {
-    cancelAnimationFrame(requestRef.current);
-    if (backSubRef.current) {
-      backSubRef.current.delete();
-      backSubRef.current = null;
-    }
-  };
-
-  const process = () => {
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    if (!canvas || !video || !tracking) return;
-
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-    const width = video.videoWidth;
-    const height = video.videoHeight;
-    if (!width || !height || hiddenRef.current) {
-      requestRef.current = requestAnimationFrame(process);
+    if (!running) {
+      clearInterval(timerRef.current);
       return;
     }
 
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(video, 0, 0, width, height);
+    const off = document.createElement('canvas');
+    const offCtx = off.getContext('2d');
 
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const frame = cv.matFromImageData(imageData);
-    const fgMask = new cv.Mat();
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
+    timerRef.current = setInterval(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < 2) return;
 
-    if (!backSubRef.current) {
-      backSubRef.current = new cv.BackgroundSubtractorMOG2(500, 16, false);
-    }
-    backSubRef.current.apply(frame, fgMask);
-    cv.findContours(fgMask, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+      off.width  = video.videoWidth;
+      off.height = video.videoHeight;
+      offCtx.drawImage(video, 0, 0, off.width, off.height);
 
-    let puttInProgress = false;
-    let previousX = null;
-
-    if (contours.size() > 0) {
-      const ball = getCenterContour(contours);
-      if (ball) {
-        const area = cv.contourArea(ball);
-        const rect = cv.boundingRect(ball);
-        const centerX = rect.x + rect.width / 2;
-        const inStartZone =
-          rect.y > height * 0.75 &&
-          rect.y < height * 0.95 &&
-          centerX > width / 2 - 50 &&
-          centerX < width / 2 + 50;
-
-        if (!puttInProgress && inStartZone) {
-          puttInProgress = true;
-          previousX = centerX;
+      off.toBlob(async (blob) => {
+        if (!blob) {
+          console.log('No blob created from canvas');
+          return;
         }
 
-        if (puttInProgress && previousX && Math.abs(centerX - previousX) > 30) {
-          const angle = getAngle(width / 2, height, centerX, rect.y);
-          setPutts(prev => {
-            const updated = [...prev, angle];
-            if (updated.length === 5) {
-              const avg = updated.reduce((a, b) => a + b) / 5;
-              const stddev = Math.sqrt(
-                updated.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / 5
-              );
-              let rec = 'Neutral';
-              if (avg < -5) rec = 'Heavier Heel';
-              else if (avg > 5) rec = 'Heavier Toe';
-              else if (stddev > 15) rec = 'Standard';
-              onComplete({ avg, stddev, recommendation: rec });
+        try {
+          console.log('Creating FormData with frame');
+          const form = new FormData();
+          form.append('frame', blob, 'frame.jpg');
+          
+          console.log('Sending frame to backend:', BACKEND_URL);
+          const startTime = Date.now();
+          
+          const resp = await fetch(BACKEND_URL, {
+            method: 'POST',
+            body: form,
+            headers: {
+              'Accept': 'application/json'
             }
-            return updated;
           });
+          
+          const responseTime = Date.now() - startTime;
+          console.log(`Backend response (${responseTime}ms):`, resp.status, resp.statusText);
+
+          if (!resp.ok) {
+            const text = await resp.text();
+            console.error('Backend error:', text);
+            throw new Error(`${resp.status} ${resp.statusText}`);
+          }
+
+          const json = await resp.json();
+          console.log('Tracker Response:', {
+            ...json,
+            hasXY: typeof json.x === 'number' && typeof json.y === 'number',
+            hasPuttComplete: json.putt_complete === true
+          });
+
+          if (json.putt_complete) {
+            console.log('Putt complete detected');
+            onComplete({
+              avg:            json.avg,
+              stddev:         json.stddev,
+              recommendation: json.recommendation
+            });
+          } else if (typeof json.x === 'number' && typeof json.y === 'number') {
+            console.log('Ball detected at position:', { x: json.x, y: json.y });
+            onDetect();
+            onBall(json.x, json.y);
+          } else {
+            console.log('No ball detected in this frame');
+          }
+        } catch (err) {
+          console.error('Tracker error:', err);
         }
-        ball.delete();
-      }
-    }
+      }, 'image/jpeg');
+    }, intervalMs);
 
-    cleanupMats(frame, fgMask, contours, hierarchy);
-    requestRef.current = requestAnimationFrame(process);
-  };
-
-  useEffect(() => {
-    if (tracking) {
-      requestRef.current = requestAnimationFrame(process);
-    }
-  }, [tracking]);
-
-  return { putts, stopTracking };
-};
-
-export default useBallTracker;
+    return () => clearInterval(timerRef.current);
+  }, [running, videoRef, onBall, onComplete, intervalMs]);
+}
