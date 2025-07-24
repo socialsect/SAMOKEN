@@ -65,8 +65,7 @@ const Home = () => {
           </p>
         </div>
         {/* Add Register and Log In buttons here, matching mobile design */}
-        <button className="home-btn">Register</button>
-        <button className="home-btn">Log In</button>
+      
         <TopNavbar />
         <div className="carousel-section">
           <div className="carousel-container">
