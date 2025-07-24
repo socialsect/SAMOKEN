@@ -14,54 +14,53 @@ export default function useBallTracker(
   const timerRef = useRef();
 
   useEffect(() => {
+    // if we're not running, clear our timer
     if (!running) {
       clearInterval(timerRef.current);
       return;
     }
 
-    // Offscreen canvas for capturing stills
+    // create an offscreen canvas once
     const off = document.createElement('canvas');
     const offCtx = off.getContext('2d');
 
     timerRef.current = setInterval(() => {
       const video = videoRef.current;
-      if (
-        !video ||
-        video.readyState < 2 ||
-        !video.videoWidth ||
-        !video.videoHeight
-      ) {
-        return; // still loading
+      if (!video || video.readyState < 2) {
+        // video not ready yet
+        return;
       }
 
-      // ensure our offscreen canvas matches the video size
+      // match offscreen canvas to the video size
       off.width  = video.videoWidth;
       off.height = video.videoHeight;
       offCtx.drawImage(video, 0, 0);
 
-      off.toBlob(async (blob) => {
+      // grab a JPEG blob of the current frame
+      off.toBlob(async blob => {
         if (!blob) return;
 
         try {
-          const form = new FormData();
-          form.append('frame', blob, 'frame.jpg');
-
+          // POST the raw JPEG
           const resp = await fetch(BACKEND_URL, {
-            method: 'POST',
-            body: form
+            method:  'POST',
+            headers: { 'Content-Type': 'image/jpeg' },
+            body:    blob
           });
-// console.log(form)
+
           if (!resp.ok) {
             const text = await resp.text();
             console.error('Tracker 400:', text);
-            throw new Error(resp.status + ' ' + resp.statusText);
+            throw new Error(`${resp.status} ${resp.statusText}`);
           }
 
           const json = await resp.json();
+          console.log('Tracker JSON:', json);
+
           if (json.putt_complete) {
             onComplete({
-              avg:          json.avg,
-              stddev:       json.stddev,
+              avg:            json.avg,
+              stddev:         json.stddev,
               recommendation: json.recommendation
             });
           } else if (
