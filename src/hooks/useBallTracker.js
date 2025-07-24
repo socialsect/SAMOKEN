@@ -1,4 +1,3 @@
-// src/hooks/useBallTracker.js
 import { useEffect, useRef } from 'react';
 
 const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/analyze-frame`;
@@ -7,45 +6,41 @@ export default function useBallTracker(
   videoRef,
   canvasRef,
   running,
-  onBall,      // callback(cx, cy)
+  onBall,      // callback(x, y)
   onComplete,  // callback({ avg, stddev, recommendation })
+  onDetect,    // callback() when ball is detected
   intervalMs = 100
 ) {
   const timerRef = useRef();
 
   useEffect(() => {
-    // if we're not running, clear our timer
     if (!running) {
       clearInterval(timerRef.current);
       return;
     }
 
-    // create an offscreen canvas once
     const off = document.createElement('canvas');
     const offCtx = off.getContext('2d');
 
     timerRef.current = setInterval(() => {
       const video = videoRef.current;
-      if (!video || video.readyState < 2) {
-        // video not ready yet
-        return;
-      }
+      if (!video || video.readyState < 2) return;
 
-      // match offscreen canvas to the video size
       off.width  = video.videoWidth;
       off.height = video.videoHeight;
-      offCtx.drawImage(video, 0, 0);
+      offCtx.drawImage(video, 0, 0, off.width, off.height);
 
-      // grab a JPEG blob of the current frame
-      off.toBlob(async blob => {
+      off.toBlob(async (blob) => {
         if (!blob) return;
 
         try {
-          // POST the raw JPEG
+          // wrap in FormData under the key "frame"
+          const form = new FormData();
+          form.append('frame', blob, 'frame.jpg');
+
           const resp = await fetch(BACKEND_URL, {
-            method:  'POST',
-            headers: { 'Content-Type': 'image/jpeg' },
-            body:    blob
+            method: 'POST',
+            body: form
           });
 
           if (!resp.ok) {
@@ -67,6 +62,7 @@ export default function useBallTracker(
             typeof json.x === 'number' &&
             typeof json.y === 'number'
           ) {
+            onDetect();
             onBall(json.x, json.y);
           }
         } catch (err) {

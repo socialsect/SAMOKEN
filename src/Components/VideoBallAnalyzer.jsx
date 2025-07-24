@@ -1,4 +1,3 @@
-// src/components/VideoBallAnalyzer.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import useBallTracker from '../hooks/useBallTracker';
 
@@ -6,13 +5,14 @@ export default function VideoBallAnalyzer() {
   const videoRef  = useRef();
   const canvasRef = useRef();
 
-  const [running, setRunning] = useState(false);
-  const [facing,  setFacing]  = useState('environment');
-  const [path,    setPath]    = useState([]);
-  const [count,   setCount]   = useState(0);
-  const [results, setResults] = useState(null);
+  const [running,  setRunning]  = useState(false);
+  const [facing,   setFacing]   = useState('environment');
+  const [path,     setPath]     = useState([]);
+  const [count,    setCount]    = useState(0);
+  const [results,  setResults]  = useState(null);
+  const [justDetected, setJustDetected] = useState(false);
 
-  // 1) start/stop camera
+  // 1) start / stop camera
   useEffect(() => {
     let stream;
     if (running) {
@@ -51,20 +51,24 @@ export default function VideoBallAnalyzer() {
     res => {
       setResults(res);
       setCount(5);
+    },
+    () => {
+      setJustDetected(true);
+      setTimeout(() => setJustDetected(false), 200);
     }
   );
 
-  // 3) update putt count live
+  // 3) live putt count
   useEffect(() => {
     if (running && !results) {
       setCount(Math.min(5, Math.floor(path.length / 20)));
     }
   }, [path, running, results]);
 
-  // 4) draw video frame + overlays into the canvas
+  // 4) draw into canvas: full-screen video cover + center line + start zone + ball path
   useEffect(() => {
     const c   = canvasRef.current;
-    const ctx = c?.getContext('2d');
+    const ctx = c.getContext('2d');
     let raf;
 
     function draw() {
@@ -74,38 +78,37 @@ export default function VideoBallAnalyzer() {
         return;
       }
 
-      // full-screen cover math
+      // cover‐style math
       const vw = v.videoWidth, vh = v.videoHeight;
       const cw = window.innerWidth, ch = window.innerHeight;
       c.width  = cw;
       c.height = ch;
-
-      const scale   = Math.max(cw/vw, ch/vh);
-      const sw      = vw * scale, sh = vh * scale;
-      const sx      = (cw - sw) / 2, sy = (ch - sh) / 2;
+      const scale = Math.max(cw/vw, ch/vh);
+      const sw = vw * scale, sh = vh * scale;
+      const sx = (cw - sw)/2, sy = (ch - sh)/2;
 
       ctx.clearRect(0, 0, cw, ch);
       if (facing === 'user') {
         ctx.save();
         ctx.translate(cw, 0);
-        ctx.scale(-1, 1);
+        ctx.scale(-1,1);
       }
-      ctx.drawImage(v, 0, 0, vw, vh, sx, sy, sw, sh);
+      ctx.drawImage(v, 0,0, vw,vh, sx,sy, sw,sh);
       if (facing === 'user') ctx.restore();
 
       // center line
       ctx.strokeStyle = 'orange';
       ctx.lineWidth   = 2;
       ctx.beginPath();
-      ctx.moveTo(cw / 2, 0);
-      ctx.lineTo(cw / 2, ch);
+      ctx.moveTo(cw/2, 0);
+      ctx.lineTo(cw/2, ch);
       ctx.stroke();
 
       // start-zone square
       ctx.strokeStyle = 'red';
       ctx.lineWidth   = 2;
-      const size = 100;
-      ctx.strokeRect(cw/2 - size/2, ch - size, size, size);
+      const S = 100;
+      ctx.strokeRect(cw/2 - S/2, ch - S, S, S);
 
       // ball path
       if (path.length > 1) {
@@ -124,33 +127,29 @@ export default function VideoBallAnalyzer() {
     return () => cancelAnimationFrame(raf);
   }, [path, facing]);
 
-  // shared styling for video + canvas
-  const mediaStyle = {
-    position:  'fixed',
-    top:       0,
-    left:      0,
-    width:     '100vw',
-    height:    '100vh',
-    objectFit: 'cover',
-    zIndex:    1
-  };
-
   return (
-    <div style={{ position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'#000' }}>
-      {/* controls before you start */}
+    <div style={{
+      position:'fixed', top:0,left:0,
+      width:'100vw', height:'100vh',
+      background:'#000', overflow:'hidden'
+    }}>
+      {/* controls */}
       {!running && !results && (
         <div style={{ position:'absolute', top:20, left:20, zIndex:3 }}>
-          <select value={facing} onChange={e => setFacing(e.target.value)}>
+          <select value={facing} onChange={e=>setFacing(e.target.value)}>
             <option value="environment">Back</option>
             <option value="user">Front</option>
           </select>
-          <button onClick={() => setRunning(true)} style={{ marginLeft:10 }}>
+          <button
+            onClick={()=>setRunning(true)}
+            style={{ marginLeft:10 }}
+          >
             ▶️ Start Putting
           </button>
         </div>
       )}
 
-      {/* live putt count */}
+      {/* live counter */}
       {running && !results && (
         <div style={{
           position:'absolute', top:20, right:20,
@@ -161,25 +160,49 @@ export default function VideoBallAnalyzer() {
         </div>
       )}
 
-      {/* behind: native video element */}
+      {/* ball detection feedback */}
+      {justDetected && (
+        <div style={{
+          position: 'absolute', 
+          top: '50%', 
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(0,255,0,0.8)',
+          padding: '1rem 2rem',
+          borderRadius: 8,
+          color: '#000',
+          zIndex: 10,
+          pointerEvents: 'none',
+          fontSize: '1.5rem',
+          fontWeight: 'bold'
+        }}>
+          🏀 Ball Detected!
+        </div>
+      )}
+
+      {/* video & overlay */}
       <video
         ref={videoRef}
+        muted playsInline autoPlay
         style={{
-          ...mediaStyle,
-          transform: facing === 'user' ? 'scaleX(-1)' : 'none'
+          position:'fixed', top:0,left:0,
+          width:'100vw', height:'100vh',
+          objectFit:'cover',
+          transform: facing==='user' ? 'scaleX(-1)' : 'none',
+          zIndex:1
         }}
-        muted
-        playsInline
-        autoPlay
       />
-
-      {/* on top: our canvas drawing both video frame + lines */}
       <canvas
         ref={canvasRef}
-        style={mediaStyle}
+        style={{
+          position:'fixed', top:0,left:0,
+          width:'100vw', height:'100vh',
+          pointerEvents:'none',
+          zIndex:2
+        }}
       />
 
-      {/* final modal */}
+      {/* results modal */}
       {results && (
         <div style={{
           position:'absolute', top:0,left:0,
@@ -187,13 +210,14 @@ export default function VideoBallAnalyzer() {
           background:'rgba(0,0,0,0.9)',
           color:'#fff', display:'flex',
           flexDirection:'column', justifyContent:'center',
-          alignItems:'center', zIndex:4, textAlign:'center'
+          alignItems:'center', textAlign:'center',
+          zIndex:4
         }}>
           <h2>Analysis Complete</h2>
           <p>Average Angle: {results.avg.toFixed(1)}°</p>
           <p>Dispersion: {results.stddev.toFixed(1)}°</p>
           <p>Recommendation: {results.recommendation}</p>
-          <button onClick={() => window.location.reload()}>
+          <button onClick={()=>window.location.reload()}>
             Restart
           </button>
         </div>
