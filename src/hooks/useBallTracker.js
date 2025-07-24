@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
-const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/analyze-frame`;
+// For testing with hardcoded backend URL
+const BACKEND_URL = 'https://runner-web-app-backend.onrender.com/analyze-frame';
 
 export default function useBallTracker(
   videoRef,
@@ -31,43 +32,56 @@ export default function useBallTracker(
       offCtx.drawImage(video, 0, 0, off.width, off.height);
 
       off.toBlob(async (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          console.log('No blob created from canvas');
+          return;
+        }
 
         try {
-          // wrap in FormData under the key "frame"
+          console.log('Creating FormData with frame');
           const form = new FormData();
           form.append('frame', blob, 'frame.jpg');
-
+          
+          console.log('Sending frame to backend:', BACKEND_URL);
+          const startTime = Date.now();
+          
           const resp = await fetch(BACKEND_URL, {
             method: 'POST',
             body: form,
-            // Don't set Content-Type header - let the browser set it with the correct boundary
             headers: {
               'Accept': 'application/json'
             }
           });
+          
+          const responseTime = Date.now() - startTime;
+          console.log(`Backend response (${responseTime}ms):`, resp.status, resp.statusText);
 
           if (!resp.ok) {
             const text = await resp.text();
-            console.error('Tracker 400:', text);
+            console.error('Backend error:', text);
             throw new Error(`${resp.status} ${resp.statusText}`);
           }
 
           const json = await resp.json();
-          console.log('Tracker JSON:', json);
+          console.log('Tracker Response:', {
+            ...json,
+            hasXY: typeof json.x === 'number' && typeof json.y === 'number',
+            hasPuttComplete: json.putt_complete === true
+          });
 
           if (json.putt_complete) {
+            console.log('Putt complete detected');
             onComplete({
               avg:            json.avg,
               stddev:         json.stddev,
               recommendation: json.recommendation
             });
-          } else if (
-            typeof json.x === 'number' &&
-            typeof json.y === 'number'
-          ) {
+          } else if (typeof json.x === 'number' && typeof json.y === 'number') {
+            console.log('Ball detected at position:', { x: json.x, y: json.y });
             onDetect();
             onBall(json.x, json.y);
+          } else {
+            console.log('No ball detected in this frame');
           }
         } catch (err) {
           console.error('Tracker error:', err);
