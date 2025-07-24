@@ -54,7 +54,7 @@ export default function VideoBallAnalyzer() {
     },
     () => {
       setJustDetected(true);
-      setTimeout(() => setJustDetected(false), 200);
+      setTimeout(() => setJustDetected(false), 2000);
     }
   );
 
