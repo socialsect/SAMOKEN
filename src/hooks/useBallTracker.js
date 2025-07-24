@@ -1,7 +1,7 @@
 // src/hooks/useBallTracker.js
 import { useEffect, useRef } from 'react';
 
-const BACKEND_URL = 'http://192.168.1.13:8000/analyze-frame';
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/analyze-frame`;
 
 export default function useBallTracker(
   videoRef,
