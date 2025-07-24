@@ -107,7 +107,7 @@ export default function VideoBallAnalyzer() {
       // start-zone square
       ctx.strokeStyle = 'red';
       ctx.lineWidth   = 2;
-      const S = 100;
+      const S = 200;
       ctx.strokeRect(cw/2 - S/2, ch - S, S, S);
 
       // ball path
