@@ -1,39 +1,69 @@
+import { useCallback, useState, useRef, useEffect } from 'react';
 
-import { useEffect } from 'react';
+const API_URL = "https://bdc7c8dbd257.ngrok-free.app/analyze";
 
-const BACKEND_URL = 'https://runner-web-app-backend.onrender.com/analyze-frame';
+export default function useBallTracker() {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
 
-export default function useBallTracker(videoRef, running, setResult) {
-  useEffect(() => {
-    let interval;
-    if (running) {
-      interval = setInterval(async () => {
-        const video = videoRef.current;
-        if (!video) return;
+  const lastProcessedTime = useRef(0);
+  const frameInterval = 200; // 5 FPS = 200ms per frame
+  const isProcessingRef = useRef(false);
 
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg');
-        const base64Data = dataUrl.split(',')[1];
-
-        try {
-          const res = await fetch(BACKEND_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ frame: base64Data })
-          });
-          const json = await res.json();
-          setResult(json);
-        } catch (err) {
-          console.error('Tracker error:', err);
-        }
-      }, 500);
+  const processFrame = useCallback(async (videoElement) => {
+    if (!videoElement || isProcessingRef.current) return null;
+    
+    const now = Date.now();
+    if (now - lastProcessedTime.current < frameInterval) {
+      return null; // Skip if not enough time has passed for 5 FPS
     }
+    
+    lastProcessedTime.current = now;
+    isProcessingRef.current = true;
+    setIsProcessing(true);
+    setError(null);
 
-    return () => clearInterval(interval);
-  }, [running, videoRef, setResult]);
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      
+        // ✅ Use FormData instead of raw binary
+        const formData = new FormData();
+        formData.append("file", blob, "frame.jpg");
+      
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: formData,
+        });
+      
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      
+        const data = await response.json();
+        setResult(data);
+        return data;
+      } catch (err) {
+        console.error('Error processing frame:', err);
+        setError(err.message || 'Error processing frame');
+        throw err;
+      } finally {
+        setIsProcessing(false);
+        isProcessingRef.current = false;
+      }
+    },[]);
+
+
+  return {
+    processFrame,
+    isProcessing,
+    error,
+    result,
+  };
 }

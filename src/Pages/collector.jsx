@@ -192,6 +192,7 @@ const PostureAnalyzer = () => {
     boxShadow: '0 0 20px rgba(0,0,0,0.5)'
   }}
 >
+
   <video
     ref={videoRef}
     autoPlay
