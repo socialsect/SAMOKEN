@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 
-const BACKEND_URL = 'https://your-render-backend-url/analyze-frame';
+const BACKEND_URL = 'https://runner-web-app-backend.onrender.com/analyze-frame';
 
 export default function useBallTracker(videoRef, running, setResult) {
   useEffect(() => {
