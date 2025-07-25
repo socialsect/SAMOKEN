@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import useBallTracker from './useBallTracker';
+import useBallTracker from '../hooks/useBallTracker';
 
 export default function VideoBallAnalyzer() {
   const videoRef = useRef();
