@@ -1,11 +1,15 @@
 // src/wixClient.js
 import { createClient, OAuthStrategy } from "@wix/sdk";
-import { items } from "@wix/data";
+import { members } from "@wix/members";
+import { redirects } from "@wix/redirects";
+const cid = "ae6977a5-70fe-403a-80f0-58809d4cfcf6";
+const redirectUri = "http://localhost:5173/auth/callback"; // Ensure this matches your app's registered redirect URI
 
 const wixClient = createClient({
-  modules: { items },
+  modules: { members, redirects },
   auth: OAuthStrategy({
-    clientId: "8def304e-af6a-4400-bc11-7f72c6d43837",
+    clientId: cid,
+    redirectUri: redirectUri,
   }),
 });
 
