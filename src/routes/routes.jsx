@@ -24,16 +24,18 @@ import StrokeArcAnalyzer from "../Pages/Stroke";
 import { StrokeProvider } from "../contexts/StrokeContext";
 import PostureDataCollector from "../Pages/collector";
 import SAMPLE from "../Pages/sample";
-import VideoBallAnalyzer from "../Components/VideoBallAnalyzer";
-import BallTracker from "../Components/BallTracker";
-
+// import VideoBallAnalyzer from "../Components/VideoBallAnalyzer";
+// import BallTracker from "../Components/BallTracker";
+import LoginCallback from "../Pages/loginCallback";
 const Routing = () => {
   return (
     <motion.div>
       <ScrollToTop>
+
         <Routes>
-          <Route path="/ball" element={<VideoBallAnalyzer/>}/>
-          <Route path="/ball-tracker" element={<BallTracker/>}/>
+        <Route path="callback" element={<LoginCallback/>}/>
+          {/* <Route path="/ball" element={<VideoBallAnalyzer/>}/> */}
+          {/* <Route path="/ball-tracker" element={<BallTracker/>}/> */}
           <Route path="/collector" element={<PostureDataCollector/>}/>
           <Route path="/posture-detection" element={<PostureAnalyzer/>}/>
           <Route path="/auth/callback" element={<AuthCallback />} />
