@@ -23,7 +23,7 @@ import StrokeArcAnalyzer from "../Pages/Stroke";
 
 import { StrokeProvider } from "../contexts/StrokeContext";
 import PostureDataCollector from "../Pages/collector";
-// import SAMPLE from "../Pages/sample";
+import SAMPLE from "../Pages/sample";
 // import VideoBallAnalyzer from "../Components/VideoBallAnalyzer";
 // import BallTracker from "../Components/BallTracker";
 import LoginCallback from "../Pages/loginCallback";
