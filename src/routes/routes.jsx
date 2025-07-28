@@ -39,7 +39,8 @@ const Routing = () => {
           <Route path="/collector" element={<PostureDataCollector/>}/>
           <Route path="/posture-detection" element={<PostureAnalyzer/>}/>
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={<AuthPage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<AuthPage/>}/>
           <Route path="/camera" element={<CameraPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/training" element={<Training />} />

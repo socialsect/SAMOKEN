@@ -53,7 +53,6 @@ const Home = () => {
   return (
     <div className="home-container">
       <TopNavbar />
-
       <div className="greeting-section">
         <div className="user-greeting">
           <h2>
@@ -64,8 +63,6 @@ const Home = () => {
             <span className="highlight"> ?</span>
           </p>
         </div>
-        {/* Add Register and Log In buttons here, matching mobile design */}
-      
         <TopNavbar />
         <div className="carousel-section">
           <div className="carousel-container">
