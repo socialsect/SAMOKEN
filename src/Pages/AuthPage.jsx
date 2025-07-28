@@ -31,7 +31,10 @@ const AuthPage = () => {
       // This is the URL of your LoginCallback.jsx page.
       // IMPORTANT: This URI MUST be registered exactly in your Wix Developers Console
       // under your OAuth app's "Allowed authorization redirect URIs".
-      const redirectUri = "http://localhost:5173/auth/callback";
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const redirectUri = isLocalhost 
+        ? 'http://localhost:5173/auth/callback' 
+        : 'https://runner-orpin.vercel.app/auth/callback';
 
       // 2. Define the original URI.
       // This is the page the user was on *before* they clicked the login button.
