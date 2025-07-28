@@ -98,7 +98,7 @@ export default function FullscreenPostureAnalyzer() {
         ctx.translate(-cw,0);
       }
 
-      // draw video “cover”
+      // draw video "cover"
       ctx.drawImage(
         v,
         0, 0, vw, vh,
@@ -163,15 +163,31 @@ export default function FullscreenPostureAnalyzer() {
   function drawOverlay(ctx, kps, label) {
     const s = getKeypoint(kps,'left_shoulder','right_shoulder');
     const h = getKeypoint(kps,'left_hip','right_hip');
-    if (!s || !h) return;
-    ctx.strokeStyle = label==='Upright' ? 'lime'
-                     : label==='Normal'  ? 'orange'
-                                         : 'red';
+    const a = getKeypoint(kps,'left_ankle','right_ankle');
+    
+    const color = label==='Upright' ? 'lime'
+                : label==='Normal'  ? 'orange'
+                                    : 'red';
+    
+    ctx.strokeStyle = color;
     ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(h.x, h.y);
-    ctx.stroke();
+    ctx.lineCap = 'round';
+    
+    // Draw shoulder to hip line (existing line)
+    if (s && h) {
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(h.x, h.y);
+      ctx.stroke();
+    }
+    
+    // Draw hip to ankle line (new line)
+    if (h && a) {
+      ctx.beginPath();
+      ctx.moveTo(h.x, h.y);
+      ctx.lineTo(a.x, a.y);
+      ctx.stroke();
+    }
   }
 
   return (
@@ -179,7 +195,8 @@ export default function FullscreenPostureAnalyzer() {
       position: 'fixed',
       top: 0, left: 0,
       width: '100vw', height: '100vh',
-      background: '#000', overflow: 'hidden'
+      background: '#000', overflow: 'hidden',
+      fontFamily: 'Avenir, sans-serif'
     }}>
       <video
         ref={videoRef}
@@ -199,6 +216,48 @@ export default function FullscreenPostureAnalyzer() {
         }}
       />
 
+      {/* Loading Overlay */}
+      {loading && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0,
+          width: '100%', height: '100%',
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 10
+        }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid rgba(203, 0, 0, 0.3)',
+            borderTop: '4px solid #CB0000',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '20px'
+          }}></div>
+          <h2 style={{
+            fontFamily: 'GoodTimes, monospace',
+            color: '#CB0000',
+            fontSize: '1.5rem',
+            margin: '0 0 10px 0',
+            textAlign: 'center'
+          }}>
+            INITIALIZING
+          </h2>
+          <p style={{
+            color: '#fff',
+            fontSize: '1rem',
+            margin: 0,
+            textAlign: 'center'
+          }}>
+            Setting up pose detection...
+          </p>
+        </div>
+      )}
+
       {/* UI overlay */}
       <div style={{
         position: 'absolute',
@@ -214,24 +273,133 @@ export default function FullscreenPostureAnalyzer() {
           onChange={e => setFacingMode(e.target.value)}
           style={{
             pointerEvents: 'auto',
-            padding: '6px 10px',
+            padding: '12px 16px',
             fontSize: '1rem',
-            borderRadius: '4px'
+            fontFamily: 'Avenir, sans-serif',
+            fontWeight: '600',
+            borderRadius: '8px',
+            border: '2px solid #CB0000',
+            background: 'white',
+            color: '#000',
+            cursor: 'pointer',
+            minWidth: '160px',
+            outline: 'none',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
           }}
         >
-          <option value="user">🤳 Front</option>
-          <option value="environment">📷 Back</option>
+          <option value="user">🤳 Front Camera</option>
+          <option value="environment">📷 Back Camera</option>
         </select>
 
         <div style={{
           pointerEvents: 'none',
-          color: '#fff',
-          fontSize: '1.2rem',
-          background: 'rgba(0,0,0,0.5)',
-          padding: '4px 8px',
-          borderRadius: '4px'
+          background: 'rgba(0, 0, 0, 0.8)',
+          border: '2px solid #CB0000',
+          borderRadius: '8px',
+          padding: '12px 20px',
+          backdropFilter: 'blur(10px)'
         }}>
-          {loading ? 'Loading…' : posture}
+          <div style={{
+            fontFamily: 'GoodTimes, monospace',
+            color: '#CB0000',
+            fontSize: '0.9rem',
+            marginBottom: '4px',
+            textAlign: 'center'
+          }}>
+            POSTURE STATUS
+          </div>
+          <div style={{
+            color: '#fff',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            textAlign: 'center'
+          }}>
+            {loading ? 'Initializing...' : posture}
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{
+        position: 'absolute',
+        bottom: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        gap: '20px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        border: '2px solid #CB0000',
+        borderRadius: '8px',
+        padding: '12px 20px',
+        backdropFilter: 'blur(10px)',
+        zIndex: 2
+      }}>
+        <div style={{
+          fontFamily: 'GoodTimes, monospace',
+          color: '#CB0000',
+          fontSize: '0.8rem',
+          marginBottom: '8px',
+          textAlign: 'center',
+          width: '100%'
+        }}>
+          POSTURE LEGEND
+        </div>
+        <div style={{
+          display: 'flex',
+          gap: '20px',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{
+              width: '20px',
+              height: '4px',
+              background: 'lime',
+              borderRadius: '2px'
+            }}></div>
+            <span style={{
+              color: '#fff',
+              fontSize: '0.9rem',
+              fontFamily: 'Avenir, sans-serif'
+            }}>Upright</span>
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{
+              width: '20px',
+              height: '4px',
+              background: 'orange',
+              borderRadius: '2px'
+            }}></div>
+            <span style={{
+              color: '#fff',
+              fontSize: '0.9rem',
+              fontFamily: 'Avenir, sans-serif'
+            }}>Normal</span>
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{
+              width: '20px',
+              height: '4px',
+              background: 'red',
+              borderRadius: '2px'
+            }}></div>
+            <span style={{
+              color: '#fff',
+              fontSize: '0.9rem',
+              fontFamily: 'Avenir, sans-serif'
+            }}>Crouched</span>
+          </div>
         </div>
       </div>
 
@@ -239,16 +407,38 @@ export default function FullscreenPostureAnalyzer() {
         <div style={{
           position: 'absolute',
           bottom: 20, left: 20, right: 20,
-          color: 'red',
-          textAlign: 'center',
-          background: 'rgba(0,0,0,0.6)',
-          padding: '6px 12px',
-          borderRadius: '4px',
+          background: 'rgba(203, 0, 0, 0.9)',
+          border: '2px solid #CB0000',
+          borderRadius: '8px',
+          padding: '16px 20px',
+          backdropFilter: 'blur(10px)',
           zIndex: 2
         }}>
-          {error}
+          <div style={{
+            fontFamily: 'GoodTimes, monospace',
+            color: '#fff',
+            fontSize: '0.9rem',
+            marginBottom: '4px',
+            textAlign: 'center'
+          }}>
+            ERROR
+          </div>
+          <div style={{
+            color: '#fff',
+            fontSize: '1rem',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

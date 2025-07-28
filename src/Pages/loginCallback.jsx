@@ -28,8 +28,8 @@ export default function LoginCallback() {
     //     // This data was stored there during the login process.
     //     const data = JSON.parse(localStorage.getItem("oauthRedirectData"));
 
-        // We remove the OAuth data from the local storage.
-        localStorage.removeItem("oauthRedirectData");
+    //     // We remove the OAuth data from the local storage.
+    //     localStorage.removeItem("oauthRedirectData");
 
     //     try {
     //         // We parse the code and state from the URL.

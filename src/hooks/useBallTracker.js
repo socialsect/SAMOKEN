@@ -45,7 +45,8 @@ export default function useBallTracker() {
           headers: {
             'Accept': 'application/json',
           },
-        });     
+        });
+      
         console.log('Response status:', response.status, response.statusText);
         
         if (!response.ok) {
