@@ -1,4 +1,4 @@
-// src/pages/AuthCallback.jsx
+// src/Pages/AuthCallback.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import wixClient from "../wixClient";
@@ -7,43 +7,47 @@ const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const exchangeCode = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
-        const error = urlParams.get("error");
+    const finishAuth = async () => {
+      const stored = JSON.parse(localStorage.getItem("oauthRedirectData"));
+      // Support both query and hash params
+      let params;
+      if (window.location.search) {
+        params = new URLSearchParams(window.location.search);
+      } else if (window.location.hash) {
+        params = new URLSearchParams(window.location.hash.substring(1));
+      } else {
+        params = new URLSearchParams();
+      }
+      const code = params.get("code");
+      const state = params.get("state");
+      console.log("AuthCallback params:", { code, state, stored });
 
-        if (error) {
-          console.error("Wix OAuth error:", error);
-          navigate("/error");
-          return;
-        }
-
-        if (!code) {
-          console.error("No authorization code found in URL");
-          navigate("/");
-          return;
-        }
-
+      if (code && state === stored.state) {
+        console.log("Code received:", code);
         try {
-          await wixClient.auth.authorize({
+          const tokens = await wixClient.auth.getMemberTokens(
             code,
-            redirectUri: `${window.location.origin}/callback`,
-          });
+            state,
+            stored
+          );
+          // Exchange the code for tokens
+          wixClient.auth.setTokens(tokens);
 
-          // Force a hard navigation to /home to ensure proper routing
-          window.location.href = "/home";
+          // await wixClient.auth.authorize({
+          //   code,
+          //   redirectUri: import.meta.env.VITE_WIX_REDIRECT_URI,
+          // });
+          // await wixClient.members.getCurrentMember();
+          const member = await wixClient.members.getCurrentMember();
+          console.log("Member data:", member);
+          navigate("/home");
         } catch (err) {
-          console.error("Wix OAuth failed:", err);
-          navigate("/error");
+          console.error("OAuth error:", err);
+          navigate("/404");
         }
-      } catch (err) {
-        console.error("Error in exchangeCode:", err);
-        navigate("/error");
       }
     };
-
-    exchangeCode();
+    finishAuth();
   }, [navigate]);
 
   return (

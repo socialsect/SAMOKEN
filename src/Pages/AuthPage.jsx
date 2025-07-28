@@ -31,7 +31,7 @@ const AuthPage = () => {
       // This is the URL of your LoginCallback.jsx page.
       // IMPORTANT: This URI MUST be registered exactly in your Wix Developers Console
       // under your OAuth app's "Allowed authorization redirect URIs".
-      const redirectUri = "http://localhost:5173/callback";
+      const redirectUri = "http://localhost:5173/auth/callback";
 
       // 2. Define the original URI.
       // This is the page the user was on *before* they clicked the login button.
