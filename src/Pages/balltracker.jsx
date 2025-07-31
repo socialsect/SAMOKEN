@@ -170,12 +170,16 @@ const MobileAnalysisModal = React.memo(({ data, onReset }) => (
 <h2 style={styles.modalTitle}>Putt Analysis Complete</h2>
 <div style={styles.statsContainer}>
 <div style={styles.statItem}>
-<span style={styles.statLabel}>Average Direction:</span>
-<span style={styles.statValue}>{data.averageDirection}°</span>
+<span style={styles.statLabel}>Left Misses:</span>
+<span style={styles.statValue}>{data.leftMisses}°</span>
 </div>
 <div style={styles.statItem}>
-<span style={styles.statLabel}>Average Dispersion:</span>
-<span style={styles.statValue}>{data.averageDispersion} px</span>
+<span style={styles.statLabel}>Right Misses:</span>
+<span style={styles.statValue}>{data.rightMisses}°</span>
+</div>
+<div style={styles.statItem}>
+<span style={styles.statLabel}>Dispersion:</span>
+<span style={styles.statValue}>{data.dispersion}°</span>
 </div>
 </div>
 <div style={styles.recommendation}>
@@ -835,9 +839,10 @@ useEffect(() => {
 }, [currentPath, completedPaths, puttCount, lastDetectionBox.current, isRecording, 
     framesSinceDetection.current, canvasDimensions, getVideoDisplayDimensions, debugInfo, isMobile, isUsingBackCamera]);
 
-// Analysis logic
+// Updated analysis logic with degree calculations
 const analysisLogic = useMemo(() => {
     if (puttCount >= MAX_PUTTS && completedPaths.length > 0) {
+        const displayInfo = getVideoDisplayDimensions();
         const centerX = getCenterLineX();
 
         const puttAnalyses = completedPaths.map(path => {
@@ -852,42 +857,74 @@ const analysisLogic = useMemo(() => {
                 return null;
             }
 
+            // Calculate angle in degrees relative to target line (vertical)
             const deltaX = endPoint.x - startPoint.x;
             const deltaY = endPoint.y - startPoint.y;
+            
+            // Calculate angle from vertical (negative because Y increases downward)
             const angleRadians = Math.atan2(deltaX, -deltaY);
             const angleDegrees = angleRadians * (180 / Math.PI);
-            const dispersion = Math.abs(endPoint.x - centerX);
+            
+            // Calculate horizontal deviation from center in pixels
+            const deviationPixels = endPoint.x - centerX;
+            
+            // Convert pixel deviation to degrees (approximate field of view calculation)
+            // Assume roughly 60 degrees horizontal field of view for mobile cameras
+            const pixelsPerDegree = displayInfo.displayWidth / 60;
+            const deviationDegrees = deviationPixels / pixelsPerDegree;
 
-            return { direction: angleDegrees, dispersion: dispersion };
+            return { 
+                angleDegrees: angleDegrees,
+                deviationDegrees: deviationDegrees
+            };
         }).filter(analysis => analysis !== null);
 
         if (puttAnalyses.length === 0) return null;
 
-        const avgDirection = puttAnalyses.reduce((sum, analysis) => sum + analysis.direction, 0) / puttAnalyses.length;
-        const avgDispersion = puttAnalyses.reduce((sum, analysis) => sum + analysis.dispersion, 0) / puttAnalyses.length;
+        // Separate left and right misses
+        const leftMisses = puttAnalyses.filter(a => a.deviationDegrees < 0).map(a => a.deviationDegrees);
+        const rightMisses = puttAnalyses.filter(a => a.deviationDegrees > 0).map(a => a.deviationDegrees);
+        
+        // Calculate averages for left and right misses
+        const avgLeftMiss = leftMisses.length > 0 ? 
+            leftMisses.reduce((sum, val) => sum + val, 0) / leftMisses.length : 0;
+        const avgRightMiss = rightMisses.length > 0 ? 
+            rightMisses.reduce((sum, val) => sum + val, 0) / rightMisses.length : 0;
+        
+        // Calculate dispersion (difference between most left and most right)
+        const allDeviations = puttAnalyses.map(a => a.deviationDegrees);
+        const mostLeft = Math.min(...allDeviations);
+        const mostRight = Math.max(...allDeviations);
+        const dispersion = mostRight - mostLeft;
 
+        // Generate recommendation
         let recommendation = "";
-        if (avgDispersion > 30) {
+        if (dispersion > 2.0) {
             recommendation = "High dispersion detected. Focus on consistent stroke alignment and follow-through.";
-        } else if (avgDispersion > 15) {
+        } else if (dispersion > 1.0) {
             recommendation = "Moderate dispersion. Work on maintaining steady hand position throughout the stroke.";
         } else {
             recommendation = "Excellent consistency! Your putting stroke is very stable.";
         }
 
-        if (Math.abs(avgDirection) > 5) {
-            const direction = avgDirection > 0 ? "right" : "left";
-            recommendation += ` You tend to putt slightly to the ${direction}.`;
+        const avgOverallDeviation = allDeviations.reduce((sum, val) => sum + Math.abs(val), 0) / allDeviations.length;
+        if (avgOverallDeviation > 0.5) {
+            if (avgLeftMiss < 0 && Math.abs(avgLeftMiss) > Math.abs(avgRightMiss)) {
+                recommendation += " You tend to miss more to the left.";
+            } else if (avgRightMiss > 0) {
+                recommendation += " You tend to miss more to the right.";
+            }
         }
 
         return {
-            averageDirection: avgDirection.toFixed(1),
-            averageDispersion: avgDispersion.toFixed(1),
+            leftMisses: leftMisses.length > 0 ? avgLeftMiss.toFixed(1) : "0.0",
+            rightMisses: rightMisses.length > 0 ? `+${avgRightMiss.toFixed(1)}` : "0.0",
+            dispersion: dispersion.toFixed(1),
             recommendation
         };
     }
     return null;
-}, [puttCount, completedPaths, getCenterLineX]);
+}, [puttCount, completedPaths, getCenterLineX, getVideoDisplayDimensions]);
 
 useEffect(() => {
     if (analysisLogic) {
