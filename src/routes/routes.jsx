@@ -24,6 +24,7 @@ import StrokeArcAnalyzer from "../Pages/Stroke";
 import { StrokeProvider } from "../contexts/StrokeContext";
 import PostureDataCollector from "../Pages/collector";
 import SAMPLE from "../Pages/sample";
+import ScreenPostureAnalyzer from "../Pages/newsample";
 // import VideoBallAnalyzer from "../Components/VideoBallAnalyzer";
 import BallTracker from "../Pages/balltracker";
 import LoginCallback from "../Pages/loginCallback";
@@ -34,6 +35,7 @@ const Routing = () => {
 
         <Routes>
         <Route path="callback" element={<LoginCallback/>}/>
+        <Route path="new-posture" element={<ScreenPostureAnalyzer/>}/>
           {/* <Route path="/ball" element={<VideoBallAnalyzer/>}/> */}
           <Route path="/ball-tracker" element={<BallTracker/>}/>
           <Route path="/collector" element={<PostureDataCollector/>}/>
