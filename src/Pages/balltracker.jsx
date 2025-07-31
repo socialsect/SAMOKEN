@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from “react”;
-import axios from “axios”;
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
 
 const MAX_PUTTS = 3;
-const API_URL = “https://0f666eaf33fe.ngrok-free.app/analyze-ball/”;
+const API_URL = "https://0f666eaf33fe.ngrok-free.app/analyze-ball/";
 
 // Mobile-optimized Golf Ball Physics Kalman Filter
 class MobileOptimizedKalmanFilter {
@@ -20,7 +20,6 @@ this.processNoise = 0.08; // Optimized for mobile processing
 this.measurementNoise = 0.6; // Higher tolerance for mobile cameras
 }
 
-```
 filter(measurement) {
     const now = Date.now();
     const dt = Math.min((now - this.lastUpdate) / 1000, 0.15);
@@ -107,7 +106,7 @@ isStationary() {
 getDetectionStreak() {
     return this.detectionStreak;
 }
-```
+
 
 }
 
@@ -115,7 +114,7 @@ getDetectionStreak() {
 const smoothPath = (path, windowSize = 2) => {
 if (path.length < windowSize) return path;
 
-```
+
 const smoothed = [];
 for (let i = 0; i < path.length; i++) {
     if (path[i].x === undefined || path[i].y === undefined) {
@@ -146,21 +145,21 @@ for (let i = 0; i < path.length; i++) {
     }
 }
 return smoothed;
-```
+
 
 };
 
-const MobileControlButton = React.memo(({ onClick, children, disabled, variant = ‘primary’ }) => (
+const MobileControlButton = React.memo(({ onClick, children, disabled, variant = "primary" }) => (
 <button
-onClick={onClick}
-disabled={disabled}
-style={{
-…styles.mobileButton,
-…(variant === ‘secondary’ ? styles.secondaryButton : {}),
-…(disabled ? styles.disabledButton : {})
-}}
+  onClick={onClick}
+  disabled={disabled}
+  style={{
+    ...styles.mobileButton,
+    ...(variant === "secondary" ? styles.secondaryButton : {}),
+    ...(disabled ? styles.disabledButton : {})
+  }}
 >
-{children}
+  {children}
 </button>
 ));
 
@@ -198,7 +197,7 @@ const detectionHistory = useRef([]);
 const lastProcessTime = useRef(Date.now());
 const animationFrameId = useRef(null);
 
-```
+
 const [videoDevices, setVideoDevices] = useState([]);
 const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0);
 const [isLoading, setIsLoading] = useState(true);
@@ -995,212 +994,213 @@ return (
         )}
     </div>
 );
-```
+
 
 }
 
 const styles = {
 container: {
-position: “relative”,
-width: “100vw”,
-height: “100vh”,
-overflow: “hidden”,
-backgroundColor: “#000”,
-userSelect: “none”,
-WebkitUserSelect: “none”,
-WebkitTouchCallout: “none”
+position: "relative",
+width: "100vw",
+height: "100vh",
+overflow: "hidden",
+backgroundColor: "#000",
+userSelect: "none",
+WebkitUserSelect: "none",
+touchAction: "none",
+WebkitTouchCallout: "none"
 },
 video: {
-position: “absolute”,
+position: "absolute",
 top: 0,
 left: 0,
-width: “100%”,
-height: “100%”,
-objectFit: “cover”
+width: "100%",
+height: "100%",
+objectFit: "cover"
 },
 canvas: {
-position: “absolute”,
+position: "absolute",
 top: 0,
 left: 0,
-width: “100%”,
-height: “100%”,
+width: "100%",
+height: "100%",
 zIndex: 2,
-touchAction: “none”
+touchAction: "none"
 },
 mobileControls: {
-position: “absolute”,
+position: "absolute",
 bottom: 0,
 left: 0,
 right: 0,
 zIndex: 10,
-background: “linear-gradient(transparent, rgba(0,0,0,0.8))”,
-padding: “20px”,
-paddingBottom: “30px”
+background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)",
+padding: "20px",
+paddingBottom: "30px"
 },
 mainControl: {
-marginBottom: “15px”
+marginBottom: "15px"
 },
 secondaryControls: {
-display: “flex”,
-gap: “10px”,
-marginBottom: “15px”,
-flexWrap: “wrap”
+display: "flex",
+gap: "10px",
+marginBottom: "15px",
+flexWrap: "wrap"
 },
 mobileButton: {
-width: “100%”,
-padding: “18px 20px”,
-fontSize: “18px”,
-fontWeight: “600”,
-color: “#fff”,
-backgroundColor: “#CB0000”,
-border: “none”,
-borderRadius: “12px”,
-cursor: “pointer”,
-transition: “all 0.2s ease”,
-boxShadow: “0 4px 12px rgba(203, 0, 0, 0.3)”,
-textTransform: “uppercase”,
-letterSpacing: “0.5px”,
-minHeight: “56px”
+width: "100%",
+padding: "18px 20px",
+fontSize: "18px",
+fontWeight: "600",
+color: "#fff",
+backgroundColor: "#CB0000",
+border: "none",
+borderRadius: "12px",
+cursor: "pointer",
+transition: "all 0.2s ease",
+boxShadow: "0 4px 12px rgba(203, 0, 0, 0.3)",
+textTransform: "uppercase",
+letterSpacing: "0.5px",
+minHeight: "56px"
 },
 secondaryButton: {
-backgroundColor: “#444”,
-boxShadow: “0 2px 8px rgba(0, 0, 0, 0.3)”,
-flex: “1”,
-minWidth: “140px”,
-fontSize: “14px”,
-padding: “14px 16px”
+backgroundColor: "#444",
+boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
+flex: "1",
+minWidth: "140px",
+fontSize: "14px",
+padding: "14px 16px"
 },
 disabledButton: {
-backgroundColor: “#666”,
-cursor: “not-allowed”,
+backgroundColor: "#666",
+cursor: "not-allowed",
 opacity: 0.6,
-boxShadow: “none”
+boxShadow: "none"
 },
 mobileStatusBar: {
-display: “flex”,
-justifyContent: “space-between”,
-alignItems: “center”,
-fontSize: “14px”,
-color: “rgba(255, 255, 255, 0.8)”
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+fontSize: "14px",
+color: "rgba(255, 255, 255, 0.8)"
 },
 statusItem: {
-display: “flex”,
-alignItems: “center”,
-gap: “8px”
+display: "flex",
+alignItems: "center",
+gap: "8px"
 },
 statusDot: (confidence) => ({
-width: “8px”,
-height: “8px”,
-borderRadius: “50%”,
-backgroundColor: confidence > 0.5 ? “#00ff00” : “#ffaa00”
+width: "8px",
+height: "8px",
+borderRadius: "50%",
+backgroundColor: confidence > 0.5 ? "#00ff00" : "#ffaa00"
 }),
 processingDot: {
-width: “8px”,
-height: “8px”,
-borderRadius: “50%”,
-backgroundColor: “#ff6600”,
-animation: “pulse 1s infinite”
+width: "8px",
+height: "8px",
+borderRadius: "50%",
+backgroundColor: "#ff6600",
+animation: "pulse 1s infinite"
 },
 mobileModal: {
-position: “fixed”,
+position: "fixed",
 top: 0,
 left: 0,
 right: 0,
 bottom: 0,
-backgroundColor: “rgba(0, 0, 0, 0.9)”,
+backgroundColor: "rgba(0, 0, 0, 0.9)",
 zIndex: 1000,
-display: “flex”,
-alignItems: “center”,
-justifyContent: “center”,
-padding: “20px”
+display: "flex",
+alignItems: "center",
+justifyContent: "center",
+padding: "20px"
 },
 modalContent: {
-backgroundColor: “#fff”,
-borderRadius: “16px”,
-padding: “30px 25px”,
-maxWidth: “400px”,
-width: “100%”,
-textAlign: “center”,
-boxShadow: “0 10px 30px rgba(0, 0, 0, 0.5)”
+backgroundColor: "#fff",
+borderRadius: "16px",
+padding: "30px 25px",
+maxWidth: "400px",
+width: "100%",
+textAlign: "center",
+boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)"
 },
 modalTitle: {
-fontSize: “24px”,
-fontWeight: “700”,
-color: “#333”,
-marginBottom: “25px”
+fontSize: "24px",
+fontWeight: "700",
+color: "#333",
+marginBottom: "25px"
 },
 statsContainer: {
-marginBottom: “25px”
+marginBottom: "25px"
 },
 statItem: {
-display: “flex”,
-justifyContent: “space-between”,
-alignItems: “center”,
-padding: “12px 0”,
-borderBottom: “1px solid #eee”,
-fontSize: “16px”
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+padding: "12px 0",
+borderBottom: "1px solid #eee",
+fontSize: "16px"
 },
 statLabel: {
-color: “#666”,
-fontWeight: “500”
+color: "#666",
+fontWeight: "500"
 },
 statValue: {
-color: “#333”,
-fontWeight: “700”,
-fontSize: “18px”
+color: "#333",
+fontWeight: "700",
+fontSize: "18px"
 },
 recommendation: {
-backgroundColor: “#f8f9fa”,
-padding: “20px”,
-borderRadius: “12px”,
-fontSize: “16px”,
-lineHeight: “1.5”,
-color: “#555”,
-marginBottom: “25px”
+backgroundColor: "#f8f9fa",
+padding: "20px",
+borderRadius: "12px",
+fontSize: "16px",
+lineHeight: "1.5",
+color: "#555",
+marginBottom: "25px"
 },
 loadingOverlay: {
-position: “fixed”,
+position: "fixed",
 top: 0,
 left: 0,
 right: 0,
 bottom: 0,
-backgroundColor: “rgba(0, 0, 0, 0.9)”,
+backgroundColor: "rgba(0, 0, 0, 0.9)",
 zIndex: 999,
-display: “flex”,
-flexDirection: “column”,
-justifyContent: “center”,
-alignItems: “center”,
-color: “#fff”,
-fontSize: “18px”,
-gap: “20px”
+display: "flex",
+flexDirection: "column",
+justifyContent: "center",
+alignItems: "center",
+color: "#fff",
+fontSize: "18px",
+gap: "20px"
 },
 loadingSpinner: {
-width: “40px”,
-height: “40px”,
-border: “4px solid rgba(255, 255, 255, 0.3)”,
-borderTop: “4px solid #CB0000”,
-borderRadius: “50%”,
-animation: “spin 1s linear infinite”
+width: "40px",
+height: "40px",
+border: "4px solid rgba(255, 255, 255, 0.3)",
+borderTop: "4px solid #CB0000",
+borderRadius: "50%",
+animation: "spin 1s linear infinite"
 },
 errorOverlay: {
-position: “fixed”,
+position: "fixed",
 top: 0,
 left: 0,
 right: 0,
 bottom: 0,
-backgroundColor: “rgba(0, 0, 0, 0.9)”,
+backgroundColor: "rgba(0, 0, 0, 0.9)",
 zIndex: 999,
-display: “flex”,
-justifyContent: “center”,
-alignItems: “center”,
-padding: “20px”
+display: "flex",
+justifyContent: "center",
+alignItems: "center",
+padding: "20px"
 },
 errorMessage: {
-backgroundColor: “#fff”,
-borderRadius: “16px”,
-padding: “30px”,
-textAlign: “center”,
-maxWidth: “350px”,
-width: “100%”
+backgroundColor: "#fff",
+borderRadius: "16px",
+padding: "30px",
+textAlign: "center",
+maxWidth: "350px",
+width: "100%"
 }
 };
