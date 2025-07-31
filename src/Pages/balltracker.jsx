@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import axios from "axios";
 
 const MAX_PUTTS = 3;
-const API_URL = "https://2ce5712ba038.ngrok-free.app/analyze-ball/";
+const API_URL = "https://0f666eaf33fe.ngrok-free.app/analyze-ball/";
 
 // Mobile-optimized Golf Ball Physics Kalman Filter
 class MobileOptimizedKalmanFilter {
@@ -19,6 +19,7 @@ this.detectionStreak = 0;
 this.processNoise = 0.08; // Optimized for mobile processing
 this.measurementNoise = 0.6; // Higher tolerance for mobile cameras
 }
+
 
 filter(measurement) {
     const now = Date.now();
@@ -149,7 +150,7 @@ return smoothed;
 
 };
 
-const MobileControlButton = React.memo(({ onClick, children, disabled, variant = "primary" }) => (
+const MobileControlButton = React.memo(({ onClick, children, disabled, variant = 'primary' }) => (
 <button
   onClick={onClick}
   disabled={disabled}
@@ -1007,7 +1008,6 @@ overflow: "hidden",
 backgroundColor: "#000",
 userSelect: "none",
 WebkitUserSelect: "none",
-touchAction: "none",
 WebkitTouchCallout: "none"
 },
 video: {
@@ -1033,7 +1033,7 @@ bottom: 0,
 left: 0,
 right: 0,
 zIndex: 10,
-background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)",
+background: "linear-gradient(transparent, rgba(0,0,0,0.8))",
 padding: "20px",
 paddingBottom: "30px"
 },
