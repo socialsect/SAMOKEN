@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import axios from "axios";
 import GolfLoader from "./golfloader";
 const MAX_PUTTS = 3;
-const API_URL = "https://19364d24b176.ngrok-free.app/analyze-ball";
+const API_URL = "https://19364d24b176.ngrok-free.app/analyze-ball/";
 
 // Mobile-optimized Golf Ball Physics Kalman Filter
 class MobileOptimizedKalmanFilter {
