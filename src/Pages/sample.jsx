@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
-
+import GolfLoader from './golfloader';
 const SMOOTHING_BUFFER_SIZE = 5;
 
 export default function FullscreenPostureAnalyzer() {
@@ -217,46 +217,7 @@ export default function FullscreenPostureAnalyzer() {
       />
 
       {/* Loading Overlay */}
-      {loading && (
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0,
-          width: '100%', height: '100%',
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 10
-        }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '4px solid rgba(203, 0, 0, 0.3)',
-            borderTop: '4px solid #CB0000',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            marginBottom: '20px'
-          }}></div>
-          <h2 style={{
-            fontFamily: 'GoodTimes, monospace',
-            color: '#CB0000',
-            fontSize: '1.5rem',
-            margin: '0 0 10px 0',
-            textAlign: 'center'
-          }}>
-            INITIALIZING
-          </h2>
-          <p style={{
-            color: '#fff',
-            fontSize: '1rem',
-            margin: 0,
-            textAlign: 'center'
-          }}>
-            Setting up pose detection...
-          </p>
-        </div>
-      )}
+     {loading && <GolfLoader/>}
 
       {/* UI overlay */}
       <div style={{

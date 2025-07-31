@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-
+import GolfLoader from "./golfloader";
 const MAX_PUTTS = 3;
 const API_URL = "https://2ce5712ba038.ngrok-free.app/analyze-ball/";
 
@@ -949,10 +949,7 @@ const resetSession = useCallback(() => {
 return (
     <div style={styles.container}>
         {isLoading && (
-            <div style={styles.loadingOverlay}>
-                <div style={styles.loadingSpinner}></div>
-                <div>Loading Camera...</div>
-            </div>
+            <GolfLoader variant="ball" message="Just a minute ..." />
         )}
         
         {/* FIXED: Only apply mirror transform for front camera */}
@@ -1024,7 +1021,7 @@ return (
                 <div style={styles.errorMessage}>
                     <h3>Camera Error</h3>
                     <p>{cameraError}</p>
-                    <MobileControlButton onClick={() => window.location.reload()}>
+                    <MobileControlButton onClick={() => window.location.reload()} style={styles.btn1}>
                         Retry
                     </MobileControlButton>
                 </div>
@@ -1232,10 +1229,25 @@ justifyContent: "center",
 alignItems: "center",
 padding: "20px"
 },
+btn1:{
+    backgroundColor:"#CB0000",
+    color:"#fff",
+    border:"none",
+    borderRadius:"12px",
+    cursor:"pointer",
+    transition:"all 0.2s ease",
+    // boxShadow:"0 4px 12px rgba(203, 0, 0, 0.3)",
+    // textTransform:"uppercase",
+    letterSpacing:"0.5px",
+    minHeight:"56px",
+    fontFamily:"GoodTimes !important"
+},
 errorMessage: {
 backgroundColor: "#fff",
 borderRadius: "16px",
 padding: "30px",
+color:"#191919",
+fontFamily:"Avenir",
 textAlign: "center",
 maxWidth: "350px",
 width: "100%"

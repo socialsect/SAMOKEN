@@ -27,8 +27,8 @@ const AIFit = () => {
               created over 2,000 putter configurations and a smart AI quiz to
               help you find your perfect match. Let's get started
             </p>
-            <button className="ai-fit-btn" onClick={() => makevisible()}>
-              START
+            <button className="ai-fit-btn" onClick={() =>{navigate("ball-tracker")}}>
+          BALL TRACKER 
             </button>
             <button className="ai-fit-btn" onClick={()=>{navigate("/posture-detection")}}>Posture Detection Algorithm</button>
           </div>
