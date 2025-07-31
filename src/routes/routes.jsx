@@ -25,7 +25,7 @@ import { StrokeProvider } from "../contexts/StrokeContext";
 import PostureDataCollector from "../Pages/collector";
 import SAMPLE from "../Pages/sample";
 // import VideoBallAnalyzer from "../Components/VideoBallAnalyzer";
-// import BallTracker from "../Components/BallTracker";
+import BallTracker from "../Pages/balltracker";
 import LoginCallback from "../Pages/loginCallback";
 const Routing = () => {
   return (
@@ -35,7 +35,7 @@ const Routing = () => {
         <Routes>
         <Route path="callback" element={<LoginCallback/>}/>
           {/* <Route path="/ball" element={<VideoBallAnalyzer/>}/> */}
-          {/* <Route path="/ball-tracker" element={<BallTracker/>}/> */}
+          <Route path="/ball-tracker" element={<BallTracker/>}/>
           <Route path="/collector" element={<PostureDataCollector/>}/>
           <Route path="/posture-detection" element={<SAMPLE/>}/>
           <Route path="/auth/callback" element={<AuthCallback />} />

@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 import Routing from "./routes/routes";
-import { AuthProvider } from "./contexts/AuthContext";
+// import { AuthProvider } from "./contexts/AuthContext";
 import { PuttingMetricsProvider } from "./contexts/PuttingMetricsContext";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
@@ -28,7 +28,7 @@ return <DesktopHome />;
 return (
 <motion.div className="App">
 <PuttingMetricsProvider>
-<AuthProvider>
+{/* <AuthProvider> */}
 {/* <TopNavbar /> */}
 <main className="main-content">
 <Routing />
@@ -55,7 +55,7 @@ color: "#fff",
 }}
 />
 {/* <BottomNavbar /> */}
-</AuthProvider>
+{/* </AuthProvider> */}
 </PuttingMetricsProvider>
 </motion.div>
 );
