@@ -882,8 +882,8 @@ const analysisLogic = useMemo(() => {
         if (puttAnalyses.length === 0) return null;
 
         // Separate left and right misses
-        const leftMisses = puttAnalyses.filter(a => a.deviationDegrees < 0).map(a => a.deviationDegrees);
-        const rightMisses = puttAnalyses.filter(a => a.deviationDegrees > 0).map(a => a.deviationDegrees);
+        const leftMisses = Math.abs(puttAnalyses.filter(a => a.deviationDegrees < 0).map(a => a.deviationDegrees));
+        const rightMisses = Math.abs(puttAnalyses.filter(a => a.deviationDegrees > 0).map(a => a.deviationDegrees));
         
         // Calculate averages for left and right misses
         const avgLeftMiss = leftMisses.length > 0 ? 
