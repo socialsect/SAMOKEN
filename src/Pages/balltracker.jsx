@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import axios from "axios";
 
 const MAX_PUTTS = 3;
-const API_URL = "https://0f666eaf33fe.ngrok-free.app/analyze-ball/";
+const API_URL = "https://2ce5712ba038.ngrok-free.app/analyze-ball/";
 
 // Mobile-optimized Golf Ball Physics Kalman Filter
 class MobileOptimizedKalmanFilter {
