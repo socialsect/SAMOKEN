@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "../Styles/bottomNavbar.css";
+import { MdOutlineVideoLibrary } from "react-icons/md";
 
 // Multiple sets of navigation items
 const navSets = [
@@ -22,11 +23,11 @@ const navSets = [
   // Second set - Sample navigation (using existing icons)
   [
     {
-      to: "/profile",
-      icon: "/icons/home.svg",
-      label: "PROFILE",
+      to: "/library",
+      icon: <MdOutlineVideoLibrary size={28} />,
+      label: "LIBRARY",
       exact: true,
-      id: "i4",
+      id: "i3",
     },
     {
       to: "/analytics",
@@ -103,12 +104,11 @@ export default function BottomNavbar() {
               id={id}
               aria-current={active ? "page" : undefined}
             >
-              <img
-                src={icon}
-                alt=""
-                className="bottom-nav-icon"
-                aria-hidden="true"
-              />
+              {typeof icon === 'string' ? (
+                <img src={icon} alt="" className="bottom-nav-icon" aria-hidden="true" />
+              ) : (
+                <span className="nav-icon">{icon}</span>
+              )}
               <span className="bottom-nav-label">{label}</span>
             </NavLink>
           );
