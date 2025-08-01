@@ -19,7 +19,7 @@ import PostureDataCollector from "../Pages/collector";
 import SAMPLE from "../Pages/sample";
 import ScreenPostureAnalyzer from "../Pages/newsample";
 import BallTracker from "../Pages/balltracker";
-import LoginCallback from "../Pages/LoginCallback";
+import LoginCallback from "../Pages/loginCallback";
 import { AuthProvider, ProtectedRoute } from "../contexts/AuthContext";
 import AuthPage from "../Pages/AuthPage";
 import { motion } from "framer-motion";
