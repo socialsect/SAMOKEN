@@ -23,37 +23,37 @@ export default function LoginCallback() {
     const [errorMessage, setErrorMessage] = useState(null);
 
     // This function verifies the login process.
-    async function verifyLogin() {
-        // We retrieve the OAuth data from the local storage.
-        // This data was stored there during the login process.
-        const data = JSON.parse(localStorage.getItem("oauthRedirectData"));
+    // async function verifyLogin() {
+    //     // We retrieve the OAuth data from the local storage.
+    //     // This data was stored there during the login process.
+    //     const data = JSON.parse(localStorage.getItem("oauthRedirectData"));
 
-        // We remove the OAuth data from the local storage.
-        localStorage.removeItem("oauthRedirectData");
+    //     // We remove the OAuth data from the local storage.
+    //     localStorage.removeItem("oauthRedirectData");
 
-        try {
-            // We parse the code and state from the URL.
-            // These values were appended to the URL by the Wix platform during the OAuth process.
-            const {code, state} = myWixClient.auth.parseFromUrl();
+    //     try {
+    //         // We parse the code and state from the URL.
+    //         // These values were appended to the URL by the Wix platform during the OAuth process.
+    //         const {code, state} = myWixClient.auth.parseFromUrl();
 
-            // We call the getMemberTokens method from the auth module of the Wix client.
-            // This method exchanges the code and state for a set of tokens.
-            // These tokens are used to authenticate the user.
-            const tokens = await myWixClient.auth.getMemberTokens(code, state, data);
+    //         // We call the getMemberTokens method from the auth module of the Wix client.
+    //         // This method exchanges the code and state for a set of tokens.
+    //         // These tokens are used to authenticate the user.
+    //         const tokens = await myWixClient.auth.getMemberTokens(code, state, data);
 
-            // We store the tokens in a cookie named "session".
-            Cookies.set("session", JSON.stringify(tokens));
+    //         // We store the tokens in a cookie named "session".
+    //         Cookies.set("session", JSON.stringify(tokens));
 
-            // Finally, we redirect the user to the original page they were on before the login process started.
-            // If the original page URL doesn't exist, we default to the home page ("/").
-            window.location = data?.originalUri || "/";
-        } catch (e) {
-            // If an error occurs during the process, we update the state of the next page and error message in the React component.
-            setNextPage(data?.originalUri || "/");
-            console.error("Error verifying login:", e);
-            setErrorMessage(e.toString());
-        }
-    }
+    //         // Finally, we redirect the user to the original page they were on before the login process started.
+    //         // If the original page URL doesn't exist, we default to the home page ("/").
+    //         window.location = data?.originalUri || "/";
+    //     } catch (e) {
+    //         // If an error occurs during the process, we update the state of the next page and error message in the React component.
+    //         setNextPage(data?.originalUri || "/");
+    //         console.error("Error verifying login:", e);
+    //         setErrorMessage(e.toString());
+    //     }
+    // }
 
     // Verify the login when the component mounts.
     useEffect(() => {

@@ -1,35 +1,33 @@
 // src/Pages/AuthCallback.jsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import wixClient from "../wixClient";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const isProcessing = useRef(false);
 
   useEffect(() => {
     const finishAuth = async () => {
-      if (isProcessing.current) {
-        console.log("Already processing AuthCallback, skipping...");
-        return;
-      }
-      isProcessing.current = true;
-
       try {
         const stored = JSON.parse(localStorage.getItem("oauthRedirectData") || '{}');
         console.log("Stored OAuth data:", stored);
 
-        const params = new URLSearchParams(
-          window.location.search || window.location.hash.substring(1)
-        );
+        // Support both query and hash params
+        let params;
+        if (window.location.search) {
+          params = new URLSearchParams(window.location.search);
+        } else if (window.location.hash) {
+          params = new URLSearchParams(window.location.hash.substring(1));
+        } else {
+          throw new Error("No authentication parameters found in URL");
+        }
+
         const code = params.get("code");
         const state = params.get("state");
         console.log("AuthCallback params:", { code, state, stored });
 
         if (!code || !state) {
-          throw new Error("Missing required authentication parameters");
+          throw new Error("Missing code or state parameters");
         }
 
         if (state !== stored?.state) {
@@ -37,57 +35,55 @@ const AuthCallback = () => {
         }
 
         console.log("Exchanging code for tokens...");
-
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const redirectUri = isLocalhost 
-          ? 'http://localhost:5173/auth/callback' 
-          : 'https://runner-orpin.vercel.app/auth/callback';
-        console.log("Using redirectUri:", redirectUri);
-
-        // const tokens = await wixClient.auth.getMemberTokens(code, state, {
-        //   ...stored,
-        //   redirectUri,
-        // });
-        // console.log("Tokens received:", tokens);
-
+        const tokens = await wixClient.auth.getMemberTokens(
+          code,
+          state,
+          stored
+        );
+        
         if (!tokens?.accessToken) {
           throw new Error("No access token received");
         }
 
-        console.log("Updating auth context...");
-        await login(tokens);
+        console.log("Authentication successful, setting tokens...");
+        wixClient.auth.setTokens(tokens);
 
-        localStorage.removeItem("oauthRedirectData");
-        console.log("Authentication successful, redirecting to: /home");
-        navigate("/home", { replace: true });
-        
-      } catch (error) {
-        console.error("Authentication failed:", error);
-        if (error.message.includes("Failed to fetch tokens")) {
-          console.error("Token exchange error details:", error);
+        // Get and log member info
+        try {
+          const member = await wixClient.members.getCurrentMember();
+          console.log("Member data:", member);
+        } catch (memberError) {
+          console.error("Failed to fetch member data:", memberError);
+          // Continue even if member fetch fails, as tokens are more important
         }
+
+        // Clean up and redirect
         localStorage.removeItem("oauthRedirectData");
-        navigate("/home", { 
+        console.log("Redirecting to /home...");
+        navigate("/home", { replace: true });
+
+      } 
+      catch (error) {
+        console.error("Authentication failed:", error);
+        localStorage.removeItem("oauthRedirectData");
+        navigate("/", { 
           state: { 
             error: "Login failed",
             errorDetails: error.message 
           },
           replace: true
         });
-      } finally {
-        isProcessing.current = false;
       }
     };
 
     finishAuth();
-  }, [navigate, login]);
+  }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="text-center p-6 bg-white rounded-lg shadow-md">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-        <h2 className="text-xl font-medium text-gray-800">Completing Login</h2>
-        <p className="text-gray-600 mt-2">Please wait while we authenticate your account...</p>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+        <p>Completing login...</p>
       </div>
     </div>
   );
