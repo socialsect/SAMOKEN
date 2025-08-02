@@ -1,10 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* === RUNNER UI DESIGN SYSTEM : ROOT VARIABLES === */
 
 :root {
-  /* === Typography === */
   --font-heading: 'GoodTimes', sans-serif;
   --font-body: 'Avenir', 'DM Sans', sans-serif;
 
@@ -58,7 +56,6 @@ html, body {
   min-height: 100vh;
   background-color: #191919;
 }
-/* === GLOBAL COMPONENTS STYLES === */
 h1, h2, .heading {
   font-family: var(--font-heading);
   text-transform: uppercase;
@@ -66,26 +63,9 @@ h1, h2, .heading {
   font-weight: 600;
 }
 ::selection {
-  background: #323232; /* Background color of the selected text */
-  color: #000000;      /* Color of the selected text */
+  background: #323232;
+  color: #000000;
 }
-
-
-/* .button {
-  font-family: var(--font-body);
-  background: var(--runner-red);
-  color: var(--runner-white);
-  border-radius: var(--radius-md);
-  padding: var(--space-sm) var(--space-lg);
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition-smooth);
-}
-.button:hover {
-  background: var(--runner-darkred);
-  box-shadow: var(--shadow-hard);
-} */
-
-/* === Font Faces === */
 @font-face {
   font-family: 'Avenir';
   src: url('/Fonts/Avenir (1).ttc') format('truetype');

@@ -6,25 +6,25 @@ import Routing from "./routes/routes";
 import { PuttingMetricsProvider } from "./contexts/PuttingMetricsContext";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import DesktopHome from "./Pages/DesktopHome";
+// import DesktopHome from "./Pages/DesktopHome";
 
-function useIsDesktop() {
-const [isDesktop, setIsDesktop] = React.useState(window.innerWidth >= 1024);
-React.useEffect(() => {
-const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-window.addEventListener("resize", handleResize);
-return () => window.removeEventListener("resize", handleResize);
-}, []);
-return isDesktop;
-}
+// function useIsDesktop() {
+// const [isDesktop, setIsDesktop] = React.useState(window.innerWidth >= 1024);
+// React.useEffect(() => {
+// const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+// window.addEventListener("resize", handleResize);
+// return () => window.removeEventListener("resize", handleResize);
+// }, []);
+// return isDesktop;
+// }
 
 const App = () => {
 const location = useLocation();
-const isDesktop = useIsDesktop();
+// const isDesktop = useIsDesktop();
 // Show DesktopHome only on /home and desktop
-if (location.pathname === "/home" && isDesktop) {
-return <DesktopHome />;
-}
+// if (location.pathname === "/home" && isDesktop) {
+// return <DesktopHome />;
+// }
 return (
 <motion.div className="App">
 <PuttingMetricsProvider>
