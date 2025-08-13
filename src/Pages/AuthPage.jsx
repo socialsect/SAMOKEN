@@ -1,24 +1,7 @@
 import React from "react";
 import "../Styles/AuthPage.css"; // Assuming you have a CSS file for styling
 import { Link } from "react-router-dom"; // For your internal navigation
-import { createClient, OAuthStrategy } from "@wix/sdk"; // Crucial Wix SDK imports
-import Cookies from "js-cookie"; // To initialize the Wix client with any existing session tokens
-
-// Your Wix OAuth Client ID
-const CLIENT_ID = "ae6977a5-70fe-403a-80f0-58809d4cfcf6";
-
-// Initialize the Wix client outside the component if it's meant to be a singleton
-// This client will be used to generate the Wix login URL.
-// It's initialized with any existing session tokens from the cookie,
-// which is good practice, though not strictly necessary for *initiating* login.
-const myWixClient = createClient({
-  auth: OAuthStrategy({
-    clientId: CLIENT_ID,
-    // Attempt to parse existing tokens from the 'session' cookie.
-    // If the cookie doesn't exist, JSON.parse(null) or JSON.parse('null') would result in null.
-    tokens: JSON.parse(Cookies.get("session") || 'null'),
-  }),
-});
+import wixClient from "../wixClient"; // Use the centralized Wix client
 
 const AuthPage = () => {
   /**
@@ -45,7 +28,7 @@ const AuthPage = () => {
 
       // 3. Generate OAuth data for the secure PKCE flow.
       // The Wix SDK handles the creation of necessary security parameters (like code_verifier and state).
-      const oauthData = myWixClient.auth.generateOAuthData(
+      const oauthData = wixClient.auth.generateOAuthData(
         redirectUri,
         originalUri
       );
@@ -54,11 +37,15 @@ const AuthPage = () => {
       // This data will be retrieved by LoginCallback.jsx to complete the PKCE flow
       // when Wix redirects the user back. It's a temporary storage.
       localStorage.setItem("oauthRedirectData", JSON.stringify(oauthData));
+      
+      // Verify the data was stored correctly
+      const storedData = localStorage.getItem("oauthRedirectData");
+      if (!storedData) {
+        throw new Error("Failed to store OAuth data");
+      }
+      console.log("OAuth data stored successfully:", JSON.parse(storedData));
 
-      // 5. Request the Wix authentication URL from the SDK.
-      // This is the URL on Wix's domain that the user will be redirected to for login.
-      // The SDK includes your CLIENT_ID and all other required OAuth parameters in this URL.
-      const { authUrl } = await myWixClient.auth.getAuthUrl(oauthData);
+      const { authUrl } = await wixClient.auth.getAuthUrl(oauthData);
 
       // 6. Redirect the user's browser to the Wix authentication URL.
       // This will take the user away from your app to Wix's login page.

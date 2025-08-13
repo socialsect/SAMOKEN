@@ -21,9 +21,12 @@ import ScreenPostureAnalyzer from "../Pages/newsample";
 import BallTracker from "../Pages/balltracker";
 import LoginCallback from "../Pages/loginCallback";
 import AuthPage from "../Pages/AuthPage";
+import Quiz from "../Pages/Quiz";
 import { motion } from "framer-motion";
 import ScrollToTop from "../Components/scroll";
 import { YouTubeVideoManager } from "../Pages/YoutubeVideoManager";
+import { AdminPanel } from "../Pages/AdminPanel";
+import ProtectedRoute from "../Components/ProtectedRoute";
 
 const Routing = () => {
   return (
@@ -51,86 +54,127 @@ const Routing = () => {
           }}
         />
         <Routes>
-          {/* Public routes */}
+          {/* Public routes - No authentication required */}
           <Route path="/" element={<AuthPage />} />
+          <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/callback" element={<LoginCallback />} />
 
-          {/* Protected routes */}
+          {/* Protected routes - Authentication required */}
           <Route
             path="/new-posture"
             element={
-              <ScreenPostureAnalyzer />
+              <ProtectedRoute>
+                <ScreenPostureAnalyzer />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/library"
             element={
-              <YouTubeVideoManager />
+              <ProtectedRoute>
+                <YouTubeVideoManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              // <ProtectedRoute>
+                <AdminPanel />
+              // {/* </ProtectedRoute> */}
             }
           />
           <Route
             path="/ball-tracker"
             element={
-              <BallTracker />
+              <ProtectedRoute>
+                <BallTracker />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/collector"
             element={
-              <PostureDataCollector />
+              <ProtectedRoute>
+                <PostureDataCollector />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/posture-detection"
             element={
-              <SAMPLE />
+              <ProtectedRoute>
+                <SAMPLE />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/camera"
             element={
-              <CameraPage />
+              <ProtectedRoute>
+                <CameraPage />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/home"
             element={
-              <Home />
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/training"
             element={
-              <Training />
+              <ProtectedRoute>
+                <Training />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/ai-fit"
             element={
-              <AIFit />
+              <ProtectedRoute>
+                <AIFit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/quiz"
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/set"
             element={
-              <Settings />
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/profile"
             element={
-              <Profile />
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/stroke"
             element={
-              <StrokeProvider>
-                <StrokeArcAnalyzer />
-              </StrokeProvider>
+              <ProtectedRoute>
+                <StrokeProvider>
+                  <StrokeArcAnalyzer />
+                </StrokeProvider>
+              </ProtectedRoute>
             }
           />
 
