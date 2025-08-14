@@ -5,6 +5,7 @@ import Routing from "./routes/routes";
 import { PuttingMetricsProvider } from "./contexts/PuttingMetricsContext";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { Analytics } from '@vercel/analytics/react';
 
 
 const App = () => {
@@ -38,6 +39,7 @@ const App = () => {
                     }} />
                 {/* <BottomNavbar /> */}
             </PuttingMetricsProvider>
+            <Analytics />
         </motion.div>
     );
 };

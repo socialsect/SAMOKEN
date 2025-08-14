@@ -26,6 +26,8 @@ import { motion } from "framer-motion";
 import ScrollToTop from "../Components/scroll";
 import { YouTubeVideoManager } from "../Pages/YoutubeVideoManager";
 import { AdminPanel } from "../Pages/AdminPanel";
+import { YTPanel } from "../Pages/YTPanel";
+import { Analytics } from "../Pages/Analytics";
 import ProtectedRoute from "../Components/ProtectedRoute";
 
 const Routing = () => {
@@ -84,6 +86,22 @@ const Routing = () => {
             element={
               // <ProtectedRoute>
                 <AdminPanel />
+              // {/* </ProtectedRoute> */}
+            }
+          />
+          <Route
+            path="/yt-panel"
+            element={
+              // <ProtectedRoute>
+                <YTPanel />
+              // {/* </ProtectedRoute> */}
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              // <ProtectedRoute>
+                <Analytics />
               // {/* </ProtectedRoute> */}
             }
           />

@@ -7,21 +7,41 @@ export const useYouTubeVideos = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Extract YouTube ID from any URL format
+  // Extract YouTube ID from any URL format - improved version
   const getYouTubeId = (url) => {
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      return null;
+    }
+    
     const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+    const match = url.trim().match(regExp);
+    
+    // Only return if we have a valid 11-character YouTube ID
+    if (match && match[2] && match[2].length === 11) {
+      return match[2];
+    }
+    
+    return null;
   };
 
-  // Fetch all videos
+  // Fetch all videos - improved error handling
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      console.log('Fetching videos from:', `${API_BASE}/getVideos`);
+      setError(null); // Clear any previous errors
       
-      const response = await fetch(`${API_BASE}/getVideos`);
-      console.log('Fetch videos response status:', response.status);
+      // console.log('Fetching videos from:', `${API_BASE}/getVideos`);
+      
+      const response = await fetch(`${API_BASE}/getVideos`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      // console.log('Fetch videos response status:', response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -30,212 +50,195 @@ export const useYouTubeVideos = () => {
       }
       
       const data = await response.json();
-      console.log('Fetch videos response data:', data);
+      // console.log('Fetch videos response data:', data);
+      
+      // Check if data has the expected structure
+      if (!data || !data.videos) {
+        throw new Error('Invalid response format: missing videos array');
+      }
       
       const { videos } = data;
       
-      // Enhance with YouTube data
-      const enhancedVideos = videos.map(video => ({
-        ...video,
-        videoId: getYouTubeId(video.url),
-        thumbnail: `https://img.youtube.com/vi/${getYouTubeId(video.url)}/mqdefault.jpg`,
-        embedUrl: `https://www.youtube.com/embed/${getYouTubeId(video.url)}`
-      }));
+      // Filter out videos with empty required fields and enhance with YouTube data
+      const validVideos = videos.filter(video => {
+        return video && video.title && video.url && video.title.trim() !== '' && video.url.trim() !== '';
+      });
       
-      console.log('Enhanced videos:', enhancedVideos);
+      // console.log('Valid videos after filtering:', validVideos.length);
+      
+      // Enhance with YouTube data - handle null videoIds gracefully
+      const enhancedVideos = validVideos.map(video => {
+        const videoId = getYouTubeId(video.url);
+        
+        return {
+          ...video,
+          videoId: videoId,
+          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null,
+          embedUrl: videoId ? `https://www.youtube.com/embed/${videoId}` : null
+        };
+      });
+      
+      // console.log('Enhanced videos:', enhancedVideos);
       setVideos(enhancedVideos);
+      
     } catch (err) {
       console.error('Fetch videos error:', err);
       setError(err.message);
+      setVideos([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
   };
 
-  // Add new video - with enhanced debugging
+  // Add new video
   const addVideo = async (videoData) => {
     try {
-      console.log('=== ADD VIDEO DEBUG START ===');
-      console.log('Input videoData:', videoData);
-      console.log('VideoData type:', typeof videoData);
-      console.log('VideoData keys:', Object.keys(videoData));
-      console.log('API URL:', `${API_BASE}/addVideo`);
+      // console.log('=== ADD VIDEO DEBUG START ===');
+      // console.log('Input videoData:', videoData);
+      // console.log('API URL:', `${API_BASE}/addVideo`);
       
-      // Ensure we have the required fields before making the request
+      // Ensure we have the required fields
       if (!videoData.title || !videoData.url) {
         throw new Error(`Missing required fields: title="${videoData.title}", url="${videoData.url}"`);
       }
       
-      // Clean the data to ensure no undefined values
+      // Clean the data
       const cleanVideoData = {
-        title: videoData.title ,
-        description: videoData.description ,
-        url: videoData.url ,
+        title: String(videoData.title || '').trim(),
+        description: String(videoData.description || '').trim(),
+        url: String(videoData.url || '').trim(),
       };
       
-      console.log('Clean video data:', cleanVideoData);
+      // console.log('Clean video data:', cleanVideoData);
       
-      const requestBody = JSON.stringify(cleanVideoData);
-      console.log('Request body (string):', requestBody);
-      console.log('Request body type:', typeof requestBody);
-      console.log('Request body length:', requestBody.length);
-      
-      // Verify the JSON is parseable
-      try {
-        const parsed = JSON.parse(requestBody);
-        console.log('Parsed verification:', parsed);
-        console.log('Parsed title:', parsed.title);
-        console.log('Parsed url:', parsed.url);
-      } catch (parseTest) {
-        console.error('JSON stringify/parse test failed:', parseTest);
-        throw new Error('Failed to create valid JSON');
-      }
-      
-      const fetchOptions = {
+      const response = await fetch(`${API_BASE}/addVideo`, {
         method: 'POST',
+        mode: 'cors',
         headers: { 
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: requestBody
-      };
+        body: JSON.stringify(cleanVideoData)
+      });
       
-      console.log('Fetch options:', fetchOptions);
-      console.log('=== MAKING REQUEST ===');
-      
-      const response = await fetch(`${API_BASE}/addVideo`, fetchOptions);
-      
-      console.log('Add video response status:', response.status);
-      console.log('Add video response headers:', Object.fromEntries(response.headers.entries()));
+      // console.log('Add video response status:', response.status);
+      // console.log('Add video response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Add video error response:', errorText);
-        console.error('Error response length:', errorText.length);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       const result = await response.json();
-      console.log('Add video success:', result);
+      // console.log('Add video success:', result);
       
-      // Check if the backend returned an error even with 200 status
-      if (result.success === false) {
+      if (!result.success) {
         throw new Error(result.error || 'Add failed');
       }
       
-      console.log('=== ADD VIDEO DEBUG END ===');
+      // console.log('=== ADD VIDEO DEBUG END ===');
       
       await fetchVideos(); // Refresh list
       return result;
     } catch (err) {
       console.error('=== ADD VIDEO ERROR ===');
       console.error('Add video error:', err);
-      console.error('Error details:', {
-        message: err.message,
-        stack: err.stack,
-        videoData: videoData
-      });
+      setError(err.message);
       throw err;
     }
   };
 
-  // Update video - with enhanced debugging
-  const updateVideo = async (id, updates) => {
-    try {
-      console.log('=== UPDATE VIDEO DEBUG START ===');
-      console.log('Updating video:', { id, updates });
-      console.log('API URL:', `${API_BASE}/updateVideo`);
+  // Update video
+  // const updateVideo = async (id, updates) => {
+  //   try {
+  //     // console.log('=== UPDATE VIDEO DEBUG START ===');
+  //     // console.log('Updating video:', { id, updates });
+  //     // console.log('API URL:', `${API_BASE}/updateVideo`);
       
-      // Validate ID
-      if (!id) {
-        throw new Error('Video ID is required for update');
-      }
+  //     // Validate ID
+  //     if (!id) {
+  //       throw new Error('Video ID is required for update');
+  //     }
       
-      // Clean the updates data
-      const cleanUpdates = {
-        title: updates.title || '',
-        description: updates.description || '',
-        url: updates.url || '',
-      };
+  //     // Clean the updates data
+  //     const cleanUpdates = {
+  //       title: updates.title ? String(updates.title).trim() : undefined,
+  //       description: updates.description ? String(updates.description).trim() : undefined,
+  //       url: updates.url ? String(updates.url).trim() : undefined,
+  //     };
       
-      const requestData = { id, ...cleanUpdates };
-      console.log('Request data:', requestData);
+  //     // Remove undefined values
+  //     Object.keys(cleanUpdates).forEach(key => {
+  //       if (cleanUpdates[key] === undefined) {
+  //         delete cleanUpdates[key];
+  //       }
+  //     });
       
-      const requestBody = JSON.stringify(requestData);
-      console.log('Request body:', requestBody);
-      console.log('Request body type:', typeof requestBody);
-      console.log('Request body length:', requestBody.length);
+  //     const requestData = { id, ...cleanUpdates };
+  //     // console.log('Request data:', requestData);
       
-      const response = await fetch(`${API_BASE}/updateVideo`, {
-        method: 'POST', // Note: Using POST as per your backend setup
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: requestBody
-      });
+  //     const response = await fetch(`${API_BASE}/updateVideo`, {
+  //       method: 'PUT', // Changed to PUT to match backend expectation
+  //       headers: { 
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'application/json'
+  //       },
+  //       body: JSON.stringify(requestData)
+  //     });
       
-      console.log('Update video response status:', response.status);
-      console.log('Update video response headers:', Object.fromEntries(response.headers.entries()));
+  //     // console.log('Update video response status:', response.status);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Update video error response:', errorText);
-        console.error('Error response length:', errorText.length);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
+  //     if (!response.ok) {
+  //       const errorText = await response.text();
+  //       console.error('Update video error response:', errorText);
+  //       throw new Error(`HTTP ${response.status}: ${errorText}`);
+  //     }
       
-      const result = await response.json();
-      console.log('Update video success:', result);
+  //     const result = await response.json();
+  //     // console.log('Update video success:', result);
       
-      // Check if the backend returned an error even with 200 status
-      if (result.success === false) {
-        throw new Error(result.error || 'Update failed');
-      }
+  //     if (!result.success) {
+  //       throw new Error(result.error || 'Update failed');
+  //     }
       
-      console.log('=== UPDATE VIDEO DEBUG END ===');
+  //     // console.log('=== UPDATE VIDEO DEBUG END ===');
       
-      await fetchVideos(); // Refresh list
-      return result;
-    } catch (err) {
-      console.error('=== UPDATE VIDEO ERROR ===');
-      console.error('Update video error:', err);
-      console.error('Error details:', {
-        message: err.message,
-        stack: err.stack,
-        id: id,
-        updates: updates
-      });
-      throw err;
-    }
-  };
+  //     await fetchVideos(); // Refresh list
+  //     return result;
+  //   } catch (err) {
+  //     console.error('=== UPDATE VIDEO ERROR ===');
+  //     console.error('Update video error:', err);
+  //     setError(err.message);
+  //     throw err;
+  //   }
+  // };
 
-  // Delete video - with enhanced debugging
+  // Delete video
   const deleteVideo = async (id) => {
     try {
-      console.log('=== DELETE VIDEO DEBUG START ===');
-      console.log('Deleting video:', id);
-      console.log('Video ID type:', typeof id);
-      console.log('Video ID value:', id);
+      // console.log('=== DELETE VIDEO DEBUG START ===');
+      // console.log('Deleting video:', id);
+      // console.log('Video ID type:', typeof id);
       
-      // Validate ID before making request
+      // Validate ID
       if (!id || id === 'undefined' || id === 'null') {
         throw new Error('Invalid video ID provided');
       }
       
-      // Try query parameter approach first (as per your backend)
-      console.log('Trying query parameter approach...');
-      console.log('API URL:', `${API_BASE}/removeVideo?id=${encodeURIComponent(id)}`);
+      // console.log('API URL:', `${API_BASE}/deleteVideo`); // Fixed endpoint name
       
-      let response = await fetch(`${API_BASE}/removeVideo?id=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${API_BASE}/deleteVideo`, {
         method: 'DELETE',
         headers: { 
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
-        }
+        },
+        body: JSON.stringify({ id: String(id) }) // Send ID in body as expected by backend
       });
       
-      console.log('Delete video response status:', response.status);
-      console.log('Delete video response headers:', Object.fromEntries(response.headers.entries()));
+      // console.log('Delete video response status:', response.status);
+      // console.log('Delete video response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -244,27 +247,27 @@ export const useYouTubeVideos = () => {
       }
       
       const result = await response.json();
-      console.log('Delete video success:', result);
+      // console.log('Delete video success:', result);
       
-      // Check if the backend returned an error even with 200 status
-      if (result.success === false) {
+      if (!result.success) {
         throw new Error(result.error || 'Delete failed');
       }
       
-      console.log('=== DELETE VIDEO DEBUG END ===');
+      // console.log('=== DELETE VIDEO DEBUG END ===');
       
       await fetchVideos(); // Refresh list
       return result;
     } catch (err) {
       console.error('=== DELETE VIDEO ERROR ===');
       console.error('Delete video error:', err);
-      console.error('Error details:', {
-        message: err.message,
-        stack: err.stack,
-        videoId: id
-      });
+      setError(err.message);
       throw err;
     }
+  };
+
+  // Clear error function
+  const clearError = () => {
+    setError(null);
   };
 
   useEffect(() => {
@@ -276,8 +279,9 @@ export const useYouTubeVideos = () => {
     loading,
     error,
     addVideo,
-    updateVideo,
+    // updateVideo,
     deleteVideo,
-    refetch: fetchVideos
+    refetch: fetchVideos,
+    clearError
   };
 };
