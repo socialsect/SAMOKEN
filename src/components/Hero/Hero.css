@@ -1,0 +1,408 @@
+/* Hero Section Styles */
+.hero {
+  min-height: 100vh;
+  background: #000000;
+  color: #ffffff;
+  font-family: "Satoshi", sans-serif;
+  position: relative;
+  overflow: hidden; /* Keep vertical overflow hidden, prevent horizontal */
+  display: flex;
+  align-items: center;
+  padding-top: 120px;
+  width: 100%; /* Use 100% instead of 100vw to prevent overflow */
+  margin: 0;
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+.hero .container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  gap: 3rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hero Text */
+.hero-text {
+  max-width: 900px;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 0;
+  font-family: "Satoshi", sans-serif;
+  position: relative;
+  z-index: 10;
+  white-space: normal;
+  box-sizing: border-box;
+}
+
+.title-main {
+  display: block;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.highlight {
+  display: block;
+  color: #fa2132;
+  background: #fa2132;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero Carousel */
+.hero-carousel {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  position: relative;
+  z-index: 10;
+  padding: 2rem 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Card Container Styles */
+.carousel-card-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.carousel-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Badge Styles */
+.carousel-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.badge-icon {
+  font-size: 1rem;
+  color: #fa2132;
+}
+
+.badge-text {
+  color: #ffffff;
+}
+
+/* Carousel Header */
+.carousel-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 3rem;
+}
+
+.carousel-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-family: "Satoshi", sans-serif;
+}
+
+.carousel-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Swiper Container */
+.carousel-swiper-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Custom Swiper Styles */
+.hero-swiper {
+  width: 100%;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.hero-swiper-slide {
+  width: 300px !important;
+  height: 400px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* Center slide (active) - slightly bigger for focus effect */
+.hero-swiper-slide-active {
+  transform: scale(1.05) !important;
+  opacity: 1 !important;
+  z-index: 10;
+}
+
+/* Side slides - slightly smaller */
+.hero-swiper-slide-prev,
+.hero-swiper-slide-next {
+  transform: scale(0.95) !important;
+  opacity: 0.9 !important;
+  z-index: 5;
+}
+
+/* Far side slides - smallest */
+.hero-swiper-slide-prev-prev,
+.hero-swiper-slide-next-next {
+  transform: scale(0.85) !important;
+  opacity: 0.7 !important;
+  z-index: 1;
+}
+
+/* Ensure smooth infinite loop */
+.hero-swiper .swiper-wrapper {
+  transition-timing-function: linear;
+  display: flex;
+  align-items: center;
+}
+
+.hero-swiper .swiper-slide {
+  transition: transform 0.3s ease;
+}
+
+/* Remove default shadows for coverflow effect */
+.swiper-3d .swiper-slide-shadow-left,
+.swiper-3d .swiper-slide-shadow-right {
+  background-image: none;
+}
+
+.carousel-image-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  padding: 1.5rem 1rem 1rem;
+  color: #ffffff;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.overlay-tag {
+  background: #fa2132 ;
+  color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overlay-date {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+
+.overlay-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  font-family: "Satoshi", sans-serif;
+}
+
+/* Orange accent line */
+.carousel-accent-line {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fa2132 ;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .hero .container {
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .hero-carousel {
+    max-width: none;
+    overflow: hidden;
+  }
+  
+  .carousel-card {
+    padding: 1.5rem;
+  }
+  
+  .carousel-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 6rem 0 4rem 0;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  .hero .container {
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .hero-carousel {
+    padding: 1.5rem 0;
+    max-width: none;
+    overflow: hidden;
+  }
+  
+  .carousel-card {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+  
+  .carousel-badge {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .carousel-header {
+    padding-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .carousel-title {
+    font-size: 1.5rem;
+  }
+  
+  .carousel-subtitle {
+    font-size: 1rem;
+  }
+  
+  .hero-swiper-slide {
+    width: 250px !important;
+    height: 300px;
+  }
+  
+  .carousel-accent-line {
+    bottom: 15px; /* Adjusted for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding-top: 100px;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  .hero .container {
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .carousel-card {
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
+  
+  .carousel-badge {
+    top: 0.8rem;
+    left: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .carousel-header {
+    padding-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .carousel-title {
+    font-size: 1.2rem;
+  }
+  
+  .carousel-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .hero-swiper-slide {
+    width: 220px !important;
+    height: 280px;
+  }
+  
+  .carousel-accent-line {
+    bottom: 10px; /* Adjusted for small mobile */
+  }
+}

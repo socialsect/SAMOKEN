@@ -1,0 +1,172 @@
+/* Global App Styles */
+.app {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+/* Main content area */
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Global container styles */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+/* Global section styles */
+section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Global button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #fa2132 , #ff6b35);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(239, 76, 35, 0.3);
+}
+
+.btn:active {
+  transform: translateY(-1px);
+}
+
+.btn.secondary {
+  background: transparent;
+  border: 2px solid #fa2132 ;
+  color: #fa2132 ;
+}
+
+.btn.secondary:hover {
+  background: #fa2132 ;
+  color: #ffffff;
+}
+
+/* Global link styles */
+a {
+  color: #fa2132 ;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #ff6b35;
+}
+
+/* Global heading styles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "ClashDisplay", sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Global paragraph styles */
+p {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+/* Global list styles */
+ul, ol {
+  margin-bottom: 1rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+/* Global form styles */
+input, textarea, select {
+  font-family: "Inter", sans-serif;
+}
+
+/* Global focus styles */
+*:focus {
+  outline: 2px solid rgba(239, 76, 35, 0.5);
+  outline-offset: 2px;
+}
+
+/* Global selection styles */
+::selection {
+  background: rgba(239, 76, 35, 0.3);
+  color: #ffffff;
+}
+
+/* Global scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fa2132 ;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6b35;
+}
+
+/* Global utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+.mt-5 { margin-top: 3rem; }
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
