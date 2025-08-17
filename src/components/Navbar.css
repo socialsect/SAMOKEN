@@ -53,21 +53,16 @@
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(239, 76, 35, 0.15);
+  background: #000000;
+  border-bottom: 1px solid rgba(250, 33, 50, 0.2);
   z-index: 50;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   height: 80px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar.scrolled {
-  background: rgba(0, 0, 0, 0.98);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-bottom: 1px solid rgba(239, 76, 35, 0.2);
+  background: #000000;
+  border-bottom: 1px solid rgba(250, 33, 50, 0.25);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
@@ -76,6 +71,7 @@
   font-weight: 500;
   font-style: normal;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #000000;
 }
 
 .navbar:hover {
@@ -319,16 +315,23 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 20, 0.95));
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   z-index: 50;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  box-shadow: inset 0 4px 20px rgba(239, 76, 35, 0.1);
-  animation: overlayFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #ffffff;
+  font-family: 'Satoshi', sans-serif;
+}
+
+.overlay-menu.open {
+  opacity: 1;
+  visibility: visible;
 }
 
 @keyframes overlayFadeIn {
@@ -339,7 +342,7 @@
 
   to {
     opacity: 1;
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(24px);
   }
 }
 
@@ -412,14 +415,8 @@
   height: 52px;
   width: auto;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: brightness(0) invert(1);
   position: relative;
   z-index: 1;
-}
-
-.overlay-logo:hover img {
-  transform: scale(1.08);
-  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(5deg);
 }
 
 /* Luxury Search Container */
@@ -507,9 +504,10 @@
 .menu-content {
   display: flex;
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
-  padding: 3rem;
-  height: calc(100vh - 140px);
+  padding: 2rem 3rem 3rem;
+  height: calc(100vh - 120px);
 }
 
 .sidebar {
@@ -530,6 +528,7 @@
 }
 
 .sidebar-title {
+  font-family: 'ClashDisplay', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: #fa2132 ;
@@ -624,6 +623,7 @@
 }
 
 .search-results-title {
+  font-family: 'ClashDisplay', sans-serif;
   font-size: 2.25rem;
   font-weight: 700;
   color: #ffffff;
@@ -705,6 +705,7 @@
 }
 
 .category-title {
+  font-family: 'ClashDisplay', sans-serif;
   font-size: 2.25rem;
   font-weight: 700;
   color: #ffffff;
@@ -864,161 +865,4 @@
     padding: 0.75rem 1.5rem;
     font-size: 0.875rem;
   }
-}
-
-/* White theme overrides */
-/* Keep navbar white even when scrolled */
-.navbar.scrolled {
-  background: #ffffff !important;
-  border-bottom: 1px solid #eaeaea !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06) !important;
-}
-
-/* Overlay menu is already white; ensure text is dark */
-.overlay-menu {
-  background-color: #ffffff !important;
-  color: #0b0b0b;
-}
-
-/* Header controls */
-.close-button {
-  color: #0b0b0b;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.overlay-logo,
-.overlay-logo-text {
-  color: #0b0b0b !important;
-}
-
-/* Search bar in overlay - light theme */
-.search-container {
-  border-bottom: 1px solid #eaeaea;
-}
-
-.search-icon {
-  color: var(--ferz-orange) !important;
-}
-
-.search-input {
-  background: #ffffff !important;
-  border: 1px solid #eaeaea !important;
-  color: #0b0b0b !important;
-}
-
-.search-input::placeholder {
-  color: #9aa1a9 !important;
-}
-
-.search-input:focus {
-  border-color: #d0d5dd !important;
-  background: #ffffff !important;
-  box-shadow: 0 0 0 4px rgba(230, 78, 37, 0.08) !important;
-}
-
-/* Sidebar on light bg */
-.sidebar {
-  background: #ffffff !important;
-  border-right: 1px solid #f0f0f0 !important;
-}
-
-.sidebar-title,
-.sidebar-title-secondary {
-  color: #0b0b0b;
-}
-
-/* Links in the sidebar/content on light theme */
-.nav-link {
-  color: #1f2937 !important;
-}
-
-.nav-link:hover {
-  color: var(--ferz-orange) !important;
-}
-
-.nav-link::before {
-  background: linear-gradient(90deg, transparent, var(--ferz-orange), transparent) !important;
-}
-
-.nav-link-active {
-  color: var(--ferz-orange) !important;
-  background: rgba(255, 107, 53, 0.08) !important;
-}
-
-/* Content area text colors */
-.content-area,
-.category-content,
-.search-results {
-  color: #0b0b0b;
-}
-
-.category-title,
-.search-results-title,
-.subcategory-title {
-  color: #0b0b0b !important;
-}
-
-.category-description,
-.search-result-description,
-.placeholder-text {
-  color: #667085 !important;
-}
-
-/* Cards and grids on light theme */
-.search-result-card,
-.subcategory-card {
-  background: #ffffff !important;
-  border: 1px solid #eaeaea !important;
-}
-
-.search-result-card:hover,
-.subcategory-card:hover {
-  background: #ffffff !important;
-  border-color: rgba(255, 107, 53, 0.35) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-}
-
-.search-result-link,
-.subcategory-link {
-  color: inherit;
-}
-
-
-.overlay-contact-button:hover,
-.contact-button:hover {
-  background: var(--ferz-orange-90) !important;
-}
-
-/* Ensure placeholders and subtle text are visible on white */
-.placeholder-text {
-  color: #98a2b3 !important;
-}
-
-/* Additional white theme hard overrides */
-.navbar {
-  background: #ffffff !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-bottom: 1px solid #eaeaea !important;
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Light scrollbars for overlay and content panes */
-.overlay-menu::-webkit-scrollbar-track,
-.sidebar-content::-webkit-scrollbar-track,
-.content-area::-webkit-scrollbar-track {
-  background: #f2f4f7 !important;
-}
-
-.overlay-menu::-webkit-scrollbar-thumb,
-.sidebar-content::-webkit-scrollbar-thumb,
-.content-area::-webkit-scrollbar-thumb {
-  background: #d0d5dd !important;
-}
-
-.overlay-menu,
-.sidebar-content,
-.content-area {
-  scrollbar-width: thin;
-  scrollbar-color: #d0d5dd #f2f4f7 !important;
 }

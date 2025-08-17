@@ -5,7 +5,7 @@ import Hero from './components/Hero/Hero';
 import About from './components/About/About';
 import Features from './components/Features/Features';
 import Services from './components/Services/Services';
-import Testimonials from './components/Testimonials/Testimonials';
+// import Testimonials from './components/Testimonials/Testimonials';
 import Contact from './components/Contact/Contact';
 import Footer from './components/Footer/Footer';
 import './App.css';
@@ -20,7 +20,7 @@ const App = () => {
           <About />
           <Features />
           <Services />
-          <Testimonials />
+          {/* <Testimonials /> */}
           <Contact />
         </main>
         <Footer />

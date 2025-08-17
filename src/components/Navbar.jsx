@@ -3,37 +3,31 @@ import { Menu, X, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { sitemapData } from './sitemapData';
 import './Navbar.css';
-
 const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       setIsScrolled(scrollTop > 50);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     setSelectedCategory(null);
     setSearchQuery('');
   };
-
   const closeMenu = () => {
     setIsMenuOpen(false);
     setSelectedCategory(null);
     setSearchQuery('');
   };
-
   // Handle Escape key
   useEffect(() => {
     const handleEscape = (e) => {
@@ -41,19 +35,15 @@ const Navbar = () => {
         closeMenu();
       }
     };
-
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMenuOpen]);
-
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
   };
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -111,7 +101,7 @@ const Navbar = () => {
               onClick={closeMenu}
               aria-label="FERZ - Go to homepage"
             >
-              <img src="/FERZLETTERS.svg" alt="FERZ" />
+              <img src="/FERZWHITELETTERS.svg" alt="FERZ" />
             </Link>
           </div>
 
@@ -135,13 +125,12 @@ const Navbar = () => {
       </nav>
 
       {/* Full Screen Overlay Menu */}
-      {isMenuOpen && (
-        <div 
-          className="overlay-menu" 
+      <div 
           id="overlay-menu"
+          className={`overlay-menu ${isMenuOpen ? 'open' : ''}`}
           role="dialog"
           aria-modal="true"
-          aria-label="Navigation menu"
+          aria-labelledby="menu-title"
         >
           <div className="overlay-header">
             <button
@@ -159,7 +148,7 @@ const Navbar = () => {
                 onClick={closeMenu}
                 aria-label="FERZ - Go to homepage"
               >
-                <img src="/FERZLETTERS.svg" alt="FERZ" />
+                <img src="/FERZWHITELETTERS.svg" alt="FERZ" />
               </Link>
             </div>
 
@@ -222,7 +211,6 @@ const Navbar = () => {
                 </nav>
               </div>
             </div>
-
             <div className="content-area">
               {searchQuery.trim() && filteredItems ? (
                 <div className="search-results" role="region" aria-label="Search results">
@@ -259,8 +247,7 @@ const Navbar = () => {
                   <div className="category-header">
                     <h2 className="category-title">{selectedCategory.title}</h2>
                     <p className="category-description">{selectedCategory.description}</p>
-                  </div>
-                  
+                  </div>             
                   <div className="subcategories-grid" role="list" aria-label={`${selectedCategory.title} subcategories`}>
                     {selectedCategory.subcategories.map((subcategory) => (
                       <div key={subcategory.id} className="subcategory-card" role="listitem">
@@ -290,9 +277,7 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      )}
     </>
   );
 };
-
 export default Navbar;

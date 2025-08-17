@@ -5,13 +5,13 @@
   color: #ffffff;
   font-family: "Satoshi", sans-serif;
   position: relative;
-  overflow: hidden; /* Keep vertical overflow hidden, prevent horizontal */
+  overflow: hidden;
   display: flex;
   align-items: center;
   padding-top: 120px;
-  width: 100%; /* Use 100% instead of 100vw to prevent overflow */
+  width: 100%;
   margin: 0;
-  box-sizing: border-box; /* Include padding in width calculation */
+  box-sizing: border-box;
 }
 .hero .container {
   max-width: none;
@@ -244,7 +244,7 @@
 }
 
 .overlay-tag {
-  background: #fa2132 ;
+  background: #fa2132;
   color: #ffffff;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
@@ -278,7 +278,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: #fa2132 ;
+  background: #fa2132;
   opacity: 0.8;
   z-index: 1;
 }
